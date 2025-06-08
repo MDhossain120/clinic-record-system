@@ -1,0 +1,29 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Clinic Patient Entry</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="main.js"></script>
+</head>
+<body>
+  <h1>Clinic Patient Entry</h1>
+  <button onclick="login()">Login with Google</button>
+  <div id="formArea" style="display:none;">
+    <h3>Patient Entry</h3>
+    <input id="patient" placeholder="Patient Name"><br>
+    <input id="pcName" placeholder="PC Name"><br>
+    <input id="pcCode" placeholder="PC Code"><br>
+    <input id="doctor" placeholder="Doctor Name"><br>
+    <input id="newCount" placeholder="New Patients" type="number"><br>
+    <input id="oldCount" placeholder="Old Patients" type="number"><br>
+    <input id="otCases" placeholder="OT Cases" type="number"><br>
+    <input id="otBill" placeholder="OT Bill" type="number"><br>
+    <button onclick="submitData()">Submit</button>
+  </div>
+  <div id="entries"></div>
+</body>
+</html>
