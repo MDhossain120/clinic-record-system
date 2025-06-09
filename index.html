@@ -1,29 +1,130 @@
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Clinic Patient Entry</title>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
-  <script src="firebase-config.js"></script>
-  <script src="main.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <h1>Clinic Patient Entry</h1>
-  <button onclick="login()">Login with Google</button>
-  <div id="formArea" style="display:none;">
-    <h3>Patient Entry</h3>
-    <input id="patient" placeholder="Patient Name"><br>
-    <input id="pcName" placeholder="PC Name"><br>
-    <input id="pcCode" placeholder="PC Code"><br>
-    <input id="doctor" placeholder="Doctor Name"><br>
-    <input id="newCount" placeholder="New Patients" type="number"><br>
-    <input id="oldCount" placeholder="Old Patients" type="number"><br>
-    <input id="otCases" placeholder="OT Cases" type="number"><br>
-    <input id="otBill" placeholder="OT Bill" type="number"><br>
-    <button onclick="submitData()">Submit</button>
+<body class="bg-gray-100 p-4">
+  <div class="max-w-4xl mx-auto">
+    <div id="user-info" class="mb-4 text-right"></div>
+    <h1 class="text-2xl font-bold mb-4 text-center">Clinic Patient Entry</h1>
+    <div id="login-section" class="text-center mb-6">
+      <button onclick="signIn()" class="bg-blue-500 text-white px-4 py-2 rounded">Login with Google</button>
+    </div>
+
+    <div id="form-section" class="hidden bg-white p-4 rounded shadow">
+      <form id="patient-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <input type="text" id="staffName" placeholder="Staff Name" required class="border p-2 rounded"/>
+        <input type="text" id="designation" placeholder="Designation" class="border p-2 rounded"/>
+        <input type="text" id="patientName" placeholder="Patient Name" required class="border p-2 rounded"/>
+        <input type="text" id="pcName" placeholder="PC Name" class="border p-2 rounded"/>
+        <input type="text" id="pcCode" placeholder="PC Code" class="border p-2 rounded"/>
+        <input type="text" id="doctorName" placeholder="Doctor Name" class="border p-2 rounded"/>
+        <input type="number" id="newPatient" placeholder="New Patient" class="border p-2 rounded"/>
+        <input type="number" id="oldPatient" placeholder="Old Patient" class="border p-2 rounded"/>
+        <input type="number" id="otCases" placeholder="OT Cases" class="border p-2 rounded"/>
+        <input type="number" id="otBill" placeholder="OT Bill" class="border p-2 rounded"/>
+        <button type="submit" class="col-span-full bg-green-500 text-white px-4 py-2 rounded">Add Entry</button>
+      </form>
+    </div>
+
+    <div class="mt-8">
+      <h2 class="text-xl font-semibold mb-2">Patient Records</h2>
+      <div id="records-table" class="overflow-x-auto"></div>
+    </div>
   </div>
-  <div id="entries"></div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBqjaLgabOuFb6k8LIJXovKOZMjtxc3CjU",
+      authDomain: "clinicapp-a2f2a.firebaseapp.com",
+      projectId: "clinicapp-a2f2a",
+      storageBucket: "clinicapp-a2f2a.appspot.com",
+      messagingSenderId: "313561643437",
+      appId: "1:313561643437:web:194a95f5667928cfe78924"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    function signIn() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider);
+    }
+
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        document.getElementById("login-section").style.display = "none";
+        document.getElementById("form-section").classList.remove("hidden");
+        document.getElementById("user-info").innerHTML = "Logged in as " + user.displayName;
+        loadRecords();
+      }
+    });
+
+    document.getElementById("patient-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const newPatient = parseInt(document.getElementById("newPatient").value) || 0;
+      const oldPatient = parseInt(document.getElementById("oldPatient").value) || 0;
+      const totalPatient = newPatient + oldPatient;
+
+      await db.collection("entries").add({
+        staffName: document.getElementById("staffName").value,
+        designation: document.getElementById("designation").value,
+        patientName: document.getElementById("patientName").value,
+        pcName: document.getElementById("pcName").value,
+        pcCode: document.getElementById("pcCode").value,
+        doctorName: document.getElementById("doctorName").value,
+        newPatient,
+        oldPatient,
+        totalPatient,
+        otCases: parseInt(document.getElementById("otCases").value) || 0,
+        otBill: parseInt(document.getElementById("otBill").value) || 0,
+        timestamp: new Date()
+      });
+
+      e.target.reset();
+      loadRecords();
+    });
+
+    async function loadRecords() {
+      const snapshot = await db.collection("entries").orderBy("timestamp", "desc").get();
+      let html = '<table class="min-w-full bg-white border rounded"><thead><tr>' +
+        '<th class="px-2 py-1 border">Staff</th>' +
+        '<th class="px-2 py-1 border">Patient</th>' +
+        '<th class="px-2 py-1 border">PC</th>' +
+        '<th class="px-2 py-1 border">Doctor</th>' +
+        '<th class="px-2 py-1 border">New</th>' +
+        '<th class="px-2 py-1 border">Old</th>' +
+        '<th class="px-2 py-1 border">Total</th>' +
+        '<th class="px-2 py-1 border">OT</th>' +
+        '<th class="px-2 py-1 border">OT Bill</th>' +
+        '</tr></thead><tbody>';
+
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        html += `<tr>
+          <td class="border px-2 py-1">${d.staffName}</td>
+          <td class="border px-2 py-1">${d.patientName}</td>
+          <td class="border px-2 py-1">${d.pcName} (${d.pcCode})</td>
+          <td class="border px-2 py-1">${d.doctorName}</td>
+          <td class="border px-2 py-1">${d.newPatient}</td>
+          <td class="border px-2 py-1">${d.oldPatient}</td>
+          <td class="border px-2 py-1 font-bold">${d.totalPatient}</td>
+          <td class="border px-2 py-1">${d.otCases}</td>
+          <td class="border px-2 py-1">${d.otBill}</td>
+        </tr>`;
+      });
+
+      html += "</tbody></table>";
+      document.getElementById("records-table").innerHTML = html;
+    }
+  </script>
 </body>
 </html>
