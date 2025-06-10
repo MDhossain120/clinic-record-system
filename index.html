@@ -13,9 +13,31 @@
 <body class="bg-gray-100 p-4">
   <div class="max-w-4xl mx-auto">
     <div id="user-info" class="mb-4 text-right"></div>
-    <h1 class="text-2xl font-bold mb-4 text-center">Clinic Patient Entry</h1>
-    <div id="login-section" class="text-center mb-6">
-      <button onclick="signIn()" class="bg-blue-500 text-white px-4 py-2 rounded">Login with Google</button>
+    <h1 class="text-2xl font-bold mb-4 text-center"><div id="staff-panel" style="padding: 20px; border: 1px solid #ccc; margin-bottom: 30px;">
+  <h2>🧑‍⚕️ Staff Panel</h2>
+  <form id="staffForm">
+    <input type="text" id="staff_name" placeholder="Staff Name" required>
+    <input type="text" id="staff_code" placeholder="Code" required>
+    <input type="text" id="designation" placeholder="Designation" required>
+    <input type="text" id="mobile" placeholder="Mobile Number" required>
+    <button type="submit">Create Account</button>
+  </form>
+
+  <hr>
+
+  <h3>Daily Entry</h3>
+  <form id="patientForm">
+    <input type="text" id="pc_name" placeholder="PC Name" required>
+    <input type="text" id="pc_code" placeholder="PC Code" required>
+    <input type="number" id="new_patient" placeholder="New" required>
+    <input type="number" id="old_patient" placeholder="Old" required>
+    <input type="number" id="total_tests" placeholder="Total Tests" required>
+    <input type="number" id="ot_cases" placeholder="OT" required>
+    <input type="number" id="ot_charges" placeholder="OT Charges" required>
+    <button type="submit">Submit</button>
+  </form>
+</div>
+
     </div>
 
     <div id="form-section" class="hidden bg-white p-4 rounded shadow">
