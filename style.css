@@ -1,44 +1,25 @@
 body {
-  font-family: Arial;
+  font-family: Arial, sans-serif;
+  padding: 20px;
   background: #e6f0ff;
+}
+h2, h3 {
+  background: #0040ff;
+  color: white;
+  padding: 10px;
   text-align: center;
-  margin: 0;
-  padding: 20px;
 }
-
-.panel {
-  background: #0033cc;
-  color: white;
-  padding: 20px;
-  margin: 20px auto;
-  width: 90%;
-  max-width: 500px;
-  border-radius: 10px;
-  box-shadow: 0 0 10px gray;
+input, button {
+  margin: 5px 0;
+  padding: 10px;
+  width: 100%;
 }
-
-input, button, select {
-  margin: 10px 0;
-  padding: 8px;
-  width: 90%;
-  max-width: 300px;
-  border-radius: 5px;
-  border: none;
-  font-size: 16px;
-}
-
 button {
-  background: #0066ff;
+  background: #0040ff;
   color: white;
+  border: none;
   cursor: pointer;
 }
-
 button:hover {
-  background: #0044aa;
-}
-
-.designation-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  background: #002080;
 }
