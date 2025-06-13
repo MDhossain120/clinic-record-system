@@ -1,4 +1,3 @@
-// firebase-config.js
 const firebaseConfig = {
   apiKey: "AIzaSyBqjaLgabOuFb6k8LIJXovKOZMjtxc3CjU",
   authDomain: "clinicapp-a2f2a.firebaseapp.com",
@@ -9,7 +8,4 @@ const firebaseConfig = {
   measurementId: "G-YB9QF191NY"
 };
 
-// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
