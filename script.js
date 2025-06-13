@@ -13,7 +13,6 @@ function showPanel(panel) {
   document.getElementById("manager-panel").style.display = panel === 'manager' ? 'block' : 'none';
 }
 
-// Staff Entry Submit
 document.addEventListener("DOMContentLoaded", () => {
   const entryForm = document.getElementById("entryForm");
   if (entryForm) {
@@ -43,7 +42,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-// Manager Filters
 function filterByStaffCode() {
   const input = document.getElementById("searchInput").value.trim().toLowerCase();
   db.collection("staff_records").get().then(snapshot => {

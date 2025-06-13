@@ -1,80 +1,53 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Clinic Patient Entry</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js"></script>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clinic Record System</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script defer src="firebase-config.js"></script>
+  <script defer src="script.js"></script>
 </head>
 <body>
-  <div id="login-section">
-    <h2>Clinic Patient Entry</h2>
-    <button onclick="googleLogin()">Login with Google</button>
+  <h1>Clinic Record System</h1>
+  <button onclick="login()">Login with Google</button>
+  <button onclick="showPanel('staff')">Staff Panel</button>
+  <button onclick="showPanel('manager')">Manager Panel</button>
+
+  <div id="staff-panel" style="display:none">
+    <h2>Staff Panel</h2>
+    <form id="entryForm">
+      <input type="text" placeholder="Patient Name" id="patient" required /><br />
+      <input type="text" placeholder="PC Name" id="pcName" required /><br />
+      <input type="text" placeholder="PC Code" id="pcCode" required /><br />
+      <input type="text" placeholder="Doctor" id="doctor" required /><br />
+      <input type="number" placeholder="New Patients" id="new" required /><br />
+      <input type="number" placeholder="Old Patients" id="old" required /><br />
+      <input type="number" placeholder="OT Cases" id="otCases" required /><br />
+      <input type="number" placeholder="OT Bill" id="otBill" required /><br />
+      <button type="submit">Submit</button>
+    </form>
   </div>
 
-  <div id="panel-select" style="display:none;">
-    <h3>Please select your panel</h3>
-    <button onclick="showStaffPanel()">Staff Panel</button>
-    <button onclick="showManagerLogin()">Manager Panel</button>
-  </div>
-
-  <!-- Staff Account Creation -->
-  <div id="staff-create" style="display:none;">
-    <h3>Create your account</h3>
-    <label>Select Your Designation:</label><br>
-    <input type="radio" name="designation" value="Marketing"> Marketing<br>
-    <input type="radio" name="designation" value="Reception"> Reception<br>
-    <input type="radio" name="designation" value="Attendance"> Attendance<br>
-    <input type="radio" name="designation" value="Collection and Lab"> Collection and Lab<br>
-    <input type="radio" name="designation" value="Others"> Others<br>
-    <input type="text" id="staffName" placeholder="Enter Your Name"><br>
-    <input type="text" id="staffCode" placeholder="Enter Code"><br>
-    <button onclick="createStaffAccount()">Create</button>
-  </div>
-
-  <!-- Staff Data Entry Form -->
-  <div id="staff-panel" style="display:none;">
-    <h3>Welcome Clinic Patient Entry From</h3>
-    <p id="staff-info"></p>
-    <input type="text" id="date" placeholder="Date"><br>
-    <input type="text" id="patientName" placeholder="Patient Name"><br>
-    <input type="text" id="pcName" placeholder="PC Name"><br>
-    <input type="text" id="pcCode" placeholder="PC Code"><br>
-    <input type="text" id="doctorName" placeholder="Doctor Name"><br>
-    <input type="number" id="new" placeholder="New"><br>
-    <input type="number" id="old" placeholder="Old"><br>
-    <input type="number" id="testAmount" placeholder="Amount of Test"><br>
-    <input type="number" id="ot" placeholder="OT"><br>
-    <input type="number" id="otAmount" placeholder="OT Amount"><br>
-    <button onclick="submitData()">Submit</button>
-    <button onclick="clearForm()">Clear</button>
-  </div>
-
-  <!-- Manager Login -->
-  <div id="manager-login" style="display:none;">
-    <h3>Manager Panel</h3>
-    <input type="text" id="managerName" placeholder="Enter Your Name"><br>
-    <input type="text" id="managerCode" placeholder="Enter Code"><br>
-    <button onclick="verifyManager()">Next</button>
-  </div>
-
-  <!-- Manager Dashboard -->
-  <div id="manager-panel" style="display:none;">
-    <h3>Welcome Manager Panel</h3>
-    <p>Select the designation you want to view data for:</p>
-    <div id="designation-list">
-      <button onclick="loadDesignationData('Marketing')">Marketing</button>
-      <button onclick="loadDesignationData('Reception')">Reception</button>
-      <button onclick="loadDesignationData('Attendance')">Attendance</button>
-      <button onclick="loadDesignationData('Collection and Lab')">Collection and Lab</button>
-      <button onclick="loadDesignationData('Others')">Others</button>
+  <div id="manager-panel" style="display:none">
+    <h2>Welcome Manager</h2>
+    <div class="filter">
+      <input type="text" id="searchInput" placeholder="Staff name - code" />
+      <button onclick="filterByStaffCode()">Search</button>
+      <select id="designationFilter" onchange="filterByDesignation()">
+        <option value="">Designation</option>
+        <option>Marketing</option>
+        <option>Reception</option>
+        <option>Attendance</option>
+        <option>Collection</option>
+        <option>Lab</option>
+        <option>Other</option>
+      </select>
     </div>
-    <div id="designation-data"></div>
+    <div id="results"></div>
   </div>
-
-  <script src="app.js"></script>
 </body>
 </html>
