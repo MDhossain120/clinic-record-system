@@ -1,82 +1,87 @@
+// script.js
+
 let currentUser = null;
 
 function login() {
   const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider).then(result => {
-    currentUser = result.user;
-    alert(`Welcome ${currentUser.displayName}`);
-  });
+  auth.signInWithPopup(provider)
+    .then(result => {
+      currentUser = result.user;
+      alert("Login successful: " + currentUser.displayName);
+    })
+    .catch(error => {
+      console.error("Login error:", error);
+    });
 }
 
 function showPanel(panel) {
-  document.getElementById("staff-panel").style.display = panel === 'staff' ? 'block' : 'none';
-  document.getElementById("manager-panel").style.display = panel === 'manager' ? 'block' : 'none';
+  document.getElementById("staff-panel").style.display = panel === "staff" ? "block" : "none";
+  document.getElementById("manager-panel").style.display = panel === "manager" ? "block" : "none";
 }
 
+// Staff Form Submit
 document.addEventListener("DOMContentLoaded", () => {
-  const entryForm = document.getElementById("entryForm");
-  if (entryForm) {
-    entryForm.addEventListener("submit", (e) => {
+  const form = document.getElementById("entryForm");
+  if (form) {
+    form.addEventListener("submit", e => {
       e.preventDefault();
 
       const data = {
         staffName: currentUser.displayName,
         staffEmail: currentUser.email,
-        patientName: document.getElementById("patient").value,
+        patient: document.getElementById("patient").value,
         pcName: document.getElementById("pcName").value,
         pcCode: document.getElementById("pcCode").value,
         doctor: document.getElementById("doctor").value,
-        newPatients: Number(document.getElementById("new").value),
-        oldPatients: Number(document.getElementById("old").value),
-        otCases: Number(document.getElementById("otCases").value),
-        otBill: Number(document.getElementById("otBill").value),
-        totalPatients: Number(document.getElementById("new").value) + Number(document.getElementById("old").value),
+        newPatients: parseInt(document.getElementById("new").value),
+        oldPatients: parseInt(document.getElementById("old").value),
+        totalPatients: parseInt(document.getElementById("new").value) + parseInt(document.getElementById("old").value),
+        otCases: parseInt(document.getElementById("otCases").value),
+        otBill: parseFloat(document.getElementById("otBill").value),
         timestamp: new Date()
       };
 
-      db.collection("staff_records").add(data).then(() => {
-        alert("Record Saved Successfully!");
-        entryForm.reset();
-      });
+      db.collection("staff_records").add(data)
+        .then(() => {
+          alert("Data submitted successfully!");
+          form.reset();
+        })
+        .catch(error => {
+          console.error("Error writing document: ", error);
+        });
     });
   }
 });
 
+// Filter Manager Panel
 function filterByStaffCode() {
   const input = document.getElementById("searchInput").value.trim().toLowerCase();
-  db.collection("staff_records").get().then(snapshot => {
-    let html = "";
-    snapshot.forEach(doc => {
-      const data = doc.data();
-      if (data.staffName.toLowerCase().includes(input) || data.pcCode.toLowerCase().includes(input)) {
-        html += formatData(data);
-      }
-    });
-    document.getElementById("results").innerHTML = html || "No records found.";
-  });
-}
+  const resultsDiv = document.getElementById("results");
+  resultsDiv.innerHTML = "Loading...";
 
-function filterByDesignation() {
-  const designation = document.getElementById("designationFilter").value;
-  db.collection("staff_records").get().then(snapshot => {
-    let html = "";
-    snapshot.forEach(doc => {
-      const data = doc.data();
-      if (data.designation === designation || designation === "") {
-        html += formatData(data);
-      }
-    });
-    document.getElementById("results").innerHTML = html || "No records found.";
-  });
-}
+  db.collection("staff_records")
+    .where("staffEmail", "==", input)
+    .get()
+    .then(snapshot => {
+      let totalPatients = 0;
+      let totalBill = 0;
+      let html = "<h3>Results:</h3><ul>";
 
-function formatData(data) {
-  return `
-    <div style="margin-bottom:10px;padding:10px;border:1px solid #ccc;border-radius:5px;">
-      <strong>${data.staffName}</strong> (${data.pcCode})<br/>
-      Patient: ${data.patientName} | Doctor: ${data.doctor}<br/>
-      New: ${data.newPatients}, Old: ${data.oldPatients}, Total: ${data.totalPatients}<br/>
-      OT Cases: ${data.otCases}, OT Bill: ${data.otBill}৳
-    </div>
-  `;
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        totalPatients += d.totalPatients || 0;
+        totalBill += d.otBill || 0;
+
+        html += `<li>${d.patient} | ${d.pcName} | ${d.doctor} | ${d.totalPatients} pts | ৳${d.otBill}</li>`;
+      });
+
+      html += `</ul><p><strong>Total Patients:</strong> ${totalPatients}</p>`;
+      html += `<p><strong>Total OT Bill:</strong> ৳${totalBill}</p>`;
+
+      resultsDiv.innerHTML = html;
+    })
+    .catch(err => {
+      resultsDiv.innerHTML = "Error loading data";
+      console.error(err);
+    });
 }
