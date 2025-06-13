@@ -2,47 +2,51 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Clinic Patient Entry</title>
-  <link rel="stylesheet" href="style.css" />
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; background: white; }
+    .banner { background: #0033cc; color: white; padding: 20px; }
+    button { padding: 10px 20px; font-size: 18px; margin-top: 20px; cursor: pointer; }
+    .panel-selection { margin-top: 30px; display: none; }
+    .hidden { display: none; }
+  </style>
 </head>
 <body>
-  <h3 style="text-align: center;">১ম মে আসবে লগিং</h3>
-  <div class="login-container">
+  <div class="banner">
     <h1>Clinic Patient Entry</h1>
-    <button id="loginBtn">Login with Google</button>
+    <button onclick="login()">Login with Google</button>
   </div>
-
-  <div id="panelSelection" class="hidden">
+  <div class="panel-selection" id="panelSelection">
     <h2>Please select your panel</h2>
-    <button id="staffBtn">Staff Panel</button>
-    <button id="managerBtn">Manager Panel</button>
+    <button onclick="alert('Staff Panel Clicked')">Staff Panel</button>
+    <button onclick="alert('Manager Panel Clicked')">Manager Panel</button>
   </div>
 
-  <div id="staffPanel" class="hidden panel-box">
-    <h3>Create your account</h3>
-    <label>Select Your Designation</label><br/>
-    <input type="radio" name="designation" value="Marketing" checked> Marketing
-    <input type="radio" name="designation" value="Reception"> Reception
-    <input type="radio" name="designation" value="Attendance"> Attendance
-    <input type="radio" name="designation" value="Collection And Lab"> Collection And Lab
-    <input type="radio" name="designation" value="Others"> Others
-    <br/><br/>
-    <input type="text" id="staffName" placeholder="Enter Your Name"/><br/>
-    <input type="text" id="staffCode" placeholder="Enter Code"/><br/>
-    <button>Create</button>
-  </div>
+  <script type="module" src="firebase-config.js"></script>
+  <script type="module">
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+    import { app } from './firebase-config.js';
+    
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+    const panel = document.getElementById("panelSelection");
 
-  <div id="managerPanel" class="hidden panel-box">
-    <h3>Manager Panel</h3>
-    <input type="text" id="managerName" placeholder="Enter Your Name"/><br/>
-    <input type="text" id="managerCode" placeholder="Enter Code"/><br/>
-    <button>Create</button>
-  </div>
+    function login() {
+      signInWithPopup(auth, provider).then(result => {
+        panel.style.display = "block";
+      }).catch(error => {
+        alert("Login Failed: " + error.message);
+      });
+    }
 
-  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js"></script>
-  <script src="firebase-config.js"></script>
-  <script src="script.js"></script>
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        panel.style.display = "block";
+      }
+    });
+
+    window.login = login;
+  </script>
 </body>
 </html>
