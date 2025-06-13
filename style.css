@@ -1,34 +1,16 @@
 body {
   font-family: Arial, sans-serif;
-  padding: 20px;
+  margin: 20px;
+  background-color: #f2f2f2;
 }
-
-input, button, select {
-  margin: 5px 0;
+h1 {
+  text-align: center;
+}
+input, select, button {
+  margin: 5px;
   padding: 8px;
   width: 250px;
 }
-
 form {
   margin-top: 10px;
-}
-
-button {
-  background-color: #28a745;
-  color: white;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
-}
-
-button:hover {
-  background-color: #218838;
-}
-
-.filter {
-  margin-top: 10px;
-}
-
-#results {
-  margin-top: 20px;
 }
