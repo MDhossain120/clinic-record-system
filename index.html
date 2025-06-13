@@ -2,100 +2,60 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Clinic Record System</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <script defer src="firebase-config.js"></script>
-  <script defer src="script.js"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-    }
-
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    button {
-      margin: 5px;
-      padding: 8px 12px;
-      font-size: 16px;
-    }
-
-    form input {
-      display: block;
-      margin: 8px 0;
-      padding: 6px;
-      width: 100%;
-      max-width: 300px;
-    }
-
-    form button {
-      background-color: green;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-
-    .filter {
-      margin: 10px 0;
-    }
-
-    .filter input, .filter select {
-      padding: 6px;
-      margin: 5px;
-    }
-
-    #results {
-      margin-top: 20px;
-      background-color: #f3f3f3;
-      padding: 10px;
-    }
-  </style>
+  <script defer src="main.js"></script>
 </head>
 <body>
   <h1>Clinic Record System</h1>
-  <div id="auth-section">
+
+  <!-- Login Panel -->
+  <div id="login-section">
     <button onclick="login()">Login with Google</button>
+  </div>
+
+  <!-- Panel Selector (after login) -->
+  <div id="panel-selector" style="display: none;">
     <button onclick="showPanel('staff')">Staff Panel</button>
     <button onclick="showPanel('manager')">Manager Panel</button>
+    <button onclick="logout()">Logout</button>
   </div>
 
   <!-- Staff Panel -->
-  <div id="staff-panel" style="display:none;">
+  <div id="staff-panel" style="display:none">
     <h2>Staff Panel</h2>
     <form id="entryForm">
-      <input type="text" id="patient" placeholder="Patient Name" required />
-      <input type="text" id="pcName" placeholder="PC Name" required />
-      <input type="text" id="pcCode" placeholder="PC Code" required />
-      <input type="text" id="doctor" placeholder="Doctor" required />
-      <input type="number" id="new" placeholder="New Patients" required />
-      <input type="number" id="old" placeholder="Old Patients" required />
-      <input type="number" id="otCases" placeholder="OT Cases" required />
-      <input type="number" id="otBill" placeholder="OT Bill" required />
+      <input type="text" placeholder="Patient Name" id="patient" required /><br />
+      <input type="text" placeholder="PC Name" id="pcName" required /><br />
+      <input type="text" placeholder="PC Code" id="pcCode" required /><br />
+      <input type="text" placeholder="Doctor" id="doctor" required /><br />
+      <input type="number" placeholder="New Patients" id="new" required /><br />
+      <input type="number" placeholder="Old Patients" id="old" required /><br />
+      <input type="number" placeholder="OT Cases" id="otCases" required /><br />
+      <input type="number" placeholder="OT Bill" id="otBill" required /><br />
       <button type="submit">Submit</button>
     </form>
   </div>
 
   <!-- Manager Panel -->
-  <div id="manager-panel" style="display:none;">
-    <h2>Welcome Manager</h2>
-    <div class="filter">
-      <input type="text" id="searchInput" placeholder="Enter Staff Email or Code"/>
+  <div id="manager-panel" style="display:none">
+    <h2>Manager Panel</h2>
+    <div>
+      <input type="text" id="searchInput" placeholder="Staff name - code" />
       <button onclick="filterByStaffCode()">Search</button>
       <select id="designationFilter" onchange="filterByDesignation()">
-        <option value="">Filter by Designation</option>
-        <option value="Marketing">Marketing</option>
-        <option value="Reception">Reception</option>
-        <option value="Attendance">Attendance</option>
-        <option value="Collection">Collection</option>
-        <option value="Lab">Lab</option>
-        <option value="Other">Other</option>
+        <option value="">Designation</option>
+        <option>Marketing</option>
+        <option>Reception</option>
+        <option>Attendance</option>
+        <option>Collection</option>
+        <option>Lab</option>
+        <option>Other</option>
       </select>
     </div>
     <div id="results"></div>
