@@ -2,63 +2,47 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Clinic Record System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Clinic Patient Entry</title>
   <link rel="stylesheet" href="style.css" />
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-  <script defer src="firebase-config.js"></script>
-  <script defer src="main.js"></script>
 </head>
 <body>
-  <h1>Clinic Record System</h1>
-
-  <!-- Login Panel -->
-  <div id="login-section">
-    <button onclick="login()">Login with Google</button>
+  <h3 style="text-align: center;">১ম মে আসবে লগিং</h3>
+  <div class="login-container">
+    <h1>Clinic Patient Entry</h1>
+    <button id="loginBtn">Login with Google</button>
   </div>
 
-  <!-- Panel Selector (after login) -->
-  <div id="panel-selector" style="display: none;">
-    <button onclick="showPanel('staff')">Staff Panel</button>
-    <button onclick="showPanel('manager')">Manager Panel</button>
-    <button onclick="logout()">Logout</button>
+  <div id="panelSelection" class="hidden">
+    <h2>Please select your panel</h2>
+    <button id="staffBtn">Staff Panel</button>
+    <button id="managerBtn">Manager Panel</button>
   </div>
 
-  <!-- Staff Panel -->
-  <div id="staff-panel" style="display:none">
-    <h2>Staff Panel</h2>
-    <form id="entryForm">
-      <input type="text" placeholder="Patient Name" id="patient" required /><br />
-      <input type="text" placeholder="PC Name" id="pcName" required /><br />
-      <input type="text" placeholder="PC Code" id="pcCode" required /><br />
-      <input type="text" placeholder="Doctor" id="doctor" required /><br />
-      <input type="number" placeholder="New Patients" id="new" required /><br />
-      <input type="number" placeholder="Old Patients" id="old" required /><br />
-      <input type="number" placeholder="OT Cases" id="otCases" required /><br />
-      <input type="number" placeholder="OT Bill" id="otBill" required /><br />
-      <button type="submit">Submit</button>
-    </form>
+  <div id="staffPanel" class="hidden panel-box">
+    <h3>Create your account</h3>
+    <label>Select Your Designation</label><br/>
+    <input type="radio" name="designation" value="Marketing" checked> Marketing
+    <input type="radio" name="designation" value="Reception"> Reception
+    <input type="radio" name="designation" value="Attendance"> Attendance
+    <input type="radio" name="designation" value="Collection And Lab"> Collection And Lab
+    <input type="radio" name="designation" value="Others"> Others
+    <br/><br/>
+    <input type="text" id="staffName" placeholder="Enter Your Name"/><br/>
+    <input type="text" id="staffCode" placeholder="Enter Code"/><br/>
+    <button>Create</button>
   </div>
 
-  <!-- Manager Panel -->
-  <div id="manager-panel" style="display:none">
-    <h2>Manager Panel</h2>
-    <div>
-      <input type="text" id="searchInput" placeholder="Staff name - code" />
-      <button onclick="filterByStaffCode()">Search</button>
-      <select id="designationFilter" onchange="filterByDesignation()">
-        <option value="">Designation</option>
-        <option>Marketing</option>
-        <option>Reception</option>
-        <option>Attendance</option>
-        <option>Collection</option>
-        <option>Lab</option>
-        <option>Other</option>
-      </select>
-    </div>
-    <div id="results"></div>
+  <div id="managerPanel" class="hidden panel-box">
+    <h3>Manager Panel</h3>
+    <input type="text" id="managerName" placeholder="Enter Your Name"/><br/>
+    <input type="text" id="managerCode" placeholder="Enter Code"/><br/>
+    <button>Create</button>
   </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
