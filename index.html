@@ -19,7 +19,7 @@
     <button id="googleLoginBtn">Login with Google</button>
   </div>
 
-  <div id="panelSelection">
+  <div id="panelSelection" style="display: none;">
     <h2>Please select your panel</h2>
     <button onclick="alert('Staff Panel clicked')">Staff Panel</button>
     <button onclick="alert('Manager Panel clicked')">Manager Panel</button>
@@ -51,6 +51,7 @@
       signInWithPopup(auth, provider)
         .then(result => {
           panelSection.style.display = "block";
+          loginBtn.style.display = "none";
         })
         .catch(error => {
           alert("Login failed");
@@ -58,9 +59,11 @@
         });
     });
 
+    // Show panel if already logged in
     onAuthStateChanged(auth, (user) => {
       if (user) {
         panelSection.style.display = "block";
+        loginBtn.style.display = "none";
       }
     });
   </script>
