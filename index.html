@@ -1,38 +1,69 @@
-<!-- Firebase App (core) -->
-<script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-app.js"></script>
-<!-- Firebase Auth -->
-<script src="https://www.gstatic.com/firebasejs/9.24.0/firebase-auth.js"></script>
 
-<script type="module">
-  // Import the functions you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.24.0/firebase-app.js";
-  import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/9.24.0/firebase-auth.js";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Clinic Patient Entry</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+    .banner { background-color: #0033cc; color: white; padding: 20px; }
+    button { padding: 10px 20px; margin: 10px; font-size: 18px; cursor: pointer; }
+    #panelSelection { display: none; margin-top: 30px; }
+  </style>
+</head>
+<body>
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyBqjaLgabOuFb6k8LIJXovKOZMjtxc3CjU",
-    authDomain: "clinicapp-a2f2a.firebaseapp.com",
-    projectId: "clinicapp-a2f2a",
-    storageBucket: "clinicapp-a2f2a.appspot.com",
-    messagingSenderId: "313561643437",
-    appId: "1:313561643437:web:194a95f5667928cfe78924",
-    measurementId: "G-YB9QF191NY"
-  };
+  <div class="banner">
+    <h1>Clinic Patient Entry</h1>
+    <button id="googleLoginBtn">Login with Google</button>
+  </div>
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const provider = new GoogleAuthProvider();
+  <div id="panelSelection">
+    <h2>Please select your panel</h2>
+    <button onclick="alert('Staff Panel clicked')">Staff Panel</button>
+    <button onclick="alert('Manager Panel clicked')">Manager Panel</button>
+  </div>
 
-  document.getElementById("googleLoginBtn").addEventListener("click", () => {
-    signInWithPopup(auth, provider)
-      .then((result) => {
-        const user = result.user;
-        alert("Login Success: " + user.displayName);
-        document.getElementById("panelSelection").style.display = "block";
-      })
-      .catch((error) => {
-        alert("Login Failed");
-        console.error(error);
-      });
-  });
-</script>
+  <!-- Firebase App and Auth SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBqjaLgabOuFb6k8LIJXovKOZMjtxc3CjU",
+      authDomain: "clinicapp-a2f2a.firebaseapp.com",
+      projectId: "clinicapp-a2f2a",
+      storageBucket: "clinicapp-a2f2a.appspot.com",
+      messagingSenderId: "313561643437",
+      appId: "1:313561643437:web:194a95f5667928cfe78924",
+      measurementId: "G-YB9QF191NY"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    const loginBtn = document.getElementById("googleLoginBtn");
+    const panelSection = document.getElementById("panelSelection");
+
+    loginBtn.addEventListener("click", () => {
+      signInWithPopup(auth, provider)
+        .then(result => {
+          panelSection.style.display = "block";
+        })
+        .catch(error => {
+          alert("Login failed");
+          console.error(error);
+        });
+    });
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        panelSection.style.display = "block";
+      }
+    });
+  </script>
+
+</body>
+</html>
