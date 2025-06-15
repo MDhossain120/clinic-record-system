@@ -1,182 +1,176 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Clinic Patient Entry</title>
   <style>
     body {
-      font-family: sans-serif;
       margin: 0;
-      background-color: #001f8f;
+      font-family: 'Arial', sans-serif;
+      background-color: #001a66;
       color: white;
     }
-    h2 {
-      text-align: center;
-      background: #002fbb;
-      padding: 15px;
-      font-size: 24px;
-    }
-    .header {
+    .center {
       display: flex;
-      justify-content: space-between;
-      background: #3366ff;
-      padding: 10px;
-      font-weight: bold;
-    }
-    .container {
-      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
       padding: 20px;
     }
-    .form-container, .summary-container {
-      flex: 1;
-      margin: 10px;
-      background: #0033cc;
+    .form-box {
+      background-color: #0033cc;
       padding: 20px;
       border-radius: 10px;
+      width: 90%;
+      max-width: 700px;
     }
-    input[type="text"], input[type="number"], input[type="date"] {
+    .form-box input {
       width: 100%;
-      padding: 10px;
+      padding: 8px;
       margin: 5px 0 15px 0;
       border: none;
       border-radius: 5px;
     }
-    label {
+    .form-box label {
       display: block;
-      margin-top: 10px;
+      margin-bottom: 5px;
     }
-    button {
-      padding: 10px 20px;
-      margin: 10px 5px 0 0;
+    .button-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .button-row button {
+      flex: 1;
+      padding: 10px;
       background-color: white;
       color: #0033cc;
-      font-weight: bold;
       border: none;
       border-radius: 5px;
+      font-weight: bold;
       cursor: pointer;
     }
     table {
       width: 100%;
-      background-color: white;
-      color: #0033cc;
-      border-collapse: collapse;
       margin-bottom: 20px;
-    }
-    th, td {
-      padding: 10px;
-      border: 1px solid #0033cc;
+      background-color: white;
+      color: black;
+      border-collapse: collapse;
       text-align: center;
     }
-    .note {
-      background: white;
-      color: black;
+    th, td {
+      border: 1px solid #ccc;
+      padding: 5px;
+    }
+    .header-row {
+      background: linear-gradient(to right, #3366ff, #99ccff);
       padding: 10px;
-      margin: 20px;
-      border-radius: 5px;
+      display: flex;
+      justify-content: space-between;
+      font-weight: bold;
+    }
+    h2 {
+      text-align: center;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
   <h2>Welcome Clinic Patient Entry Form</h2>
-  <div class="header">
-    <div>Staff Name: <span id="staffName">John Doe</span></div>
-    <div>Designation: <span id="staffRole">Reception</span></div>
+
+  <div class="header-row">
+    <div>Staff Name: <span id="staffName">---</span></div>
+    <div>Designation: <span id="staffDesignation">---</span></div>
   </div>
-  <div class="container">
-    <div class="form-container">
-      <form id="entryForm">
-        <label>Date:</label>
-        <input type="date" id="entryDate" required readonly>
 
-        <label>Patient Name:</label>
-        <input type="text" id="patientName" required>
-
-        <label>PC Name:</label>
-        <input type="text" id="pcName" required>
-
-        <label>PC Code:</label>
-        <input type="text" id="pcCode" required>
-
-        <label>Doctor Name:</label>
-        <input type="text" id="doctorName" required>
-
-        <label>New:</label>
-        <input type="number" id="newCount" min="0">
-
-        <label>Old:</label>
-        <input type="number" id="oldCount" min="0">
-
-        <label>Amount of Test:</label>
-        <input type="number" id="testAmount" min="0">
-
-        <label>OT:</label>
-        <input type="number" id="otCount" min="0">
-
-        <label>OT Amount:</label>
-        <input type="number" id="otAmount" min="0">
-
-        <button type="submit">Submit</button>
-        <button type="button" onclick="document.getElementById('entryForm').reset(); setToday();">Clear</button>
-      </form>
-    </div>
-
-    <div class="summary-container">
-      <h3>Summary</h3>
-      <table>
-        <tr><th>New</th><th>Old</th><th>Amount of Test</th><th>OT</th><th>OT Amount</th></tr>
+  <div class="center">
+    <table>
+      <thead>
         <tr>
-          <td id="sumNew">0</td>
-          <td id="sumOld">0</td>
-          <td id="sumTest">0</td>
-          <td id="sumOT">0</td>
-          <td id="sumOTAmt">0</td>
+          <th>New</th>
+          <th>Old</th>
+          <th>Amount of Test</th>
+          <th>OT</th>
+          <th>OT Amount</th>
         </tr>
-      </table>
-      <p>এখানে সাবমিট করা ডাটা গুলো অটোমেটিক দেখাবে</p>
-    </div>
-  </div>
+      </thead>
+      <tbody id="summaryBody">
+        <!-- Data rows will be inserted here -->
+      </tbody>
+    </table>
 
-  <div class="note">
-    <h4>শর্তসমূহ:</h4>
-    <ol>
-      <li>Staff Name এবং Designation আগে Create করা থাকলে এই ফর্ম অটোফিল হবে।</li>
-      <li>নিচের টেবিলটি New, Old, Test, OT, OT Amount এর Total দেখাবে।</li>
-      <li>Submit করার জন্য অবশ্যই Patient Name, PC Name, PC Code, Doctor Name এবং New/Old এর যেকোনো একটি পূরণ করতে হবে।</li>
-    </ol>
+    <div class="form-box">
+      <label>Date:</label>
+      <input type="date" id="date" readonly>
+      <label>Patient Name:</label>
+      <input type="text" id="patientName">
+      <label>PC Name:</label>
+      <input type="text" id="pcName">
+      <label>PC Code:</label>
+      <input type="text" id="pcCode">
+      <label>Doctor Name:</label>
+      <input type="text" id="doctorName">
+      <label>New:</label>
+      <input type="number" id="newPatient">
+      <label>Old:</label>
+      <input type="number" id="oldPatient">
+      <label>Amount of Test:</label>
+      <input type="number" id="testCount">
+      <label>OT:</label>
+      <input type="number" id="otCount">
+      <label>OT Amount:</label>
+      <input type="number" id="otAmount">
+      <div class="button-row">
+        <button onclick="submitData()">Submit</button>
+        <button onclick="clearForm()">Clear</button>
+      </div>
+    </div>
   </div>
 
   <script>
-    function setToday() {
-      document.getElementById("entryDate").value = new Date().toISOString().split('T')[0];
-    }
-    setToday();
+    // Show today's date
+    document.getElementById("date").value = new Date().toISOString().split("T")[0];
 
-    document.getElementById("entryForm").addEventListener("submit", function (e) {
-      e.preventDefault();
+    // Dummy user data
+    const staffInfo = JSON.parse(localStorage.getItem("staffInfo"));
+    if (!staffInfo) window.location.href = "index.html"; // fallback
+    document.getElementById("staffName").innerText = staffInfo.name;
+    document.getElementById("staffDesignation").innerText = staffInfo.designation;
 
-      const patient = document.getElementById("patientName").value.trim();
-      const pcName = document.getElementById("pcName").value.trim();
-      const pcCode = document.getElementById("pcCode").value.trim();
-      const doctor = document.getElementById("doctorName").value.trim();
-      const newC = parseInt(document.getElementById("newCount").value || "0");
-      const oldC = parseInt(document.getElementById("oldCount").value || "0");
+    function submitData() {
+      const patientName = document.getElementById("patientName").value;
+      const pcName = document.getElementById("pcName").value;
+      const pcCode = document.getElementById("pcCode").value;
+      const doctorName = document.getElementById("doctorName").value;
+      const newP = document.getElementById("newPatient").value;
+      const oldP = document.getElementById("oldPatient").value;
+      const test = document.getElementById("testCount").value;
+      const ot = document.getElementById("otCount").value;
+      const otAmount = document.getElementById("otAmount").value;
 
-      if (!patient || !pcName || !pcCode || !doctor || (newC === 0 && oldC === 0)) {
-        alert("⚠️ সব ইনপুট পূরণ করুন, New অথবা Old যেকোনো একটিতে ভ্যালু দিতে হবে।");
+      // Validation
+      if (!patientName || !pcName || !pcCode || !doctorName || (!newP && !oldP)) {
+        alert("সব ঘর পূরণ করুন অথবা New/Old অন্তত একটি দিন");
         return;
       }
 
-      document.getElementById("sumNew").innerText = newC + parseInt(document.getElementById("sumNew").innerText);
-      document.getElementById("sumOld").innerText = oldC + parseInt(document.getElementById("sumOld").innerText);
-      document.getElementById("sumTest").innerText = parseInt(document.getElementById("testAmount").value || "0") + parseInt(document.getElementById("sumTest").innerText);
-      document.getElementById("sumOT").innerText = parseInt(document.getElementById("otCount").value || "0") + parseInt(document.getElementById("sumOT").innerText);
-      document.getElementById("sumOTAmt").innerText = parseInt(document.getElementById("otAmount").value || "0") + parseInt(document.getElementById("sumOTAmt").innerText);
+      const row = `<tr><td>${newP}</td><td>${oldP}</td><td>${test}</td><td>${ot}</td><td>${otAmount}</td></tr>`;
+      document.getElementById("summaryBody").innerHTML += row;
+      clearForm();
+    }
 
-      alert("✅ সাবমিট সফল হয়েছে");
-      document.getElementById("entryForm").reset();
-      setToday();
-    });
+    function clearForm() {
+      document.getElementById("patientName").value = "";
+      document.getElementById("pcName").value = "";
+      document.getElementById("pcCode").value = "";
+      document.getElementById("doctorName").value = "";
+      document.getElementById("newPatient").value = "";
+      document.getElementById("oldPatient").value = "";
+      document.getElementById("testCount").value = "";
+      document.getElementById("otCount").value = "";
+      document.getElementById("otAmount").value = "";
+    }
   </script>
 </body>
 </html>
