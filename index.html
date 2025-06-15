@@ -2,86 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Clinic Patient Entry</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f0f0f0;
-      text-align: center;
-    }
-    .panel, .login-section {
-      display: none;
-      margin-top: 20px;
-    }
-    .blue-box {
-      background-color: #0033cc;
-      color: white;
-      padding: 20px;
-      width: 80%;
-      max-width: 500px;
-      margin: auto;
-      border-radius: 10px;
-    }
-    .blue-box input[type="text"] {
-      width: 80%;
-      padding: 10px;
-      margin: 10px 0;
-    }
-    .blue-box label, .blue-box input[type="radio"] {
-      margin: 5px;
-    }
-    .btn {
-      padding: 10px 20px;
-      background-color: white;
-      color: #0033cc;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .btn:hover {
-      background-color: lightgray;
-    }
-  </style>
-</head>
-<body>
-
-  <h2>Clinic Patient Entry</h2>
-  <div id="login-section">
-    <button onclick="login()" class="btn">Login with Google</button>
-  </div>
-
-  <div id="panel-selection" class="panel">
-    <h3>Please select your panel</h3>
-    <button class="btn" onclick="showStaffPanel()">Staff Panel</button>
-    <button class="btn">Manager Panel</button>
-  </div>
-
-  <!-- Staff Panel Create Form -->
-  <div id="staff-form" class="panel blue-box">
-    <h2>Create your account</h2>
-    <p><strong>Select Your Designation</strong></p>
-
-    <label><input type="radio" name="designation" value="Marketing" checked> Marketing</label>
-    <label><input type="radio" name="designation" value="Reception"> Reception</label><br>
-    <label><input type="radio" name="designation" value="Attendance"> Attendance</label>
-    <label><input type="radio" name="designation" value="Collection And Lab"> Collection And Lab</label><br>
-    <label><input type="radio" name="designation" value="Others"> Others</label><br><br>
-
-    <label>Enter Your Name:</label><br>
-    <input type="text" id="staff-name" placeholder="Your name"><br>
-    
-    <label>Enter Code:</label><br>
-    <input type="text" id="staff-code" placeholder="Code"><br>
-    
-    <button class="btn" onclick="createStaff()">Create</button>
-  </div>
-
-  <!-- Firebase App Scripts -->
   <script type="module">
-    // Firebase imports
+    // Firebase Config
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyBqjaLgabOuFb6k8LIJXovKOZMjtxc3CjU",
@@ -94,57 +21,115 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
     const db = getFirestore(app);
+    const auth = getAuth();
+    const provider = new GoogleAuthProvider();
 
-    // Login
-    window.login = function () {
-      signInWithPopup(auth, provider).then(() => {
-        document.getElementById('login-section').style.display = 'none';
-        document.getElementById('panel-selection').style.display = 'block';
-      });
-    }
+    const loginBtn = document.getElementById("loginBtn");
+    const userInfo = document.getElementById("userInfo");
+    const entrySection = document.getElementById("entrySection");
+    const staffNameField = document.getElementById("staffName");
+    const staffDesigField = document.getElementById("staffDesig");
 
-    // Show Staff Panel Form
-    window.showStaffPanel = function () {
-      document.getElementById('panel-selection').style.display = 'none';
-      document.getElementById('staff-form').style.display = 'block';
-    }
+    loginBtn.addEventListener("click", () => {
+      signInWithPopup(auth, provider)
+        .then(result => {
+          const user = result.user;
+          userInfo.textContent = `Logged in as: ${user.displayName}`;
+          staffNameField.value = user.displayName;
+          entrySection.style.display = "block";
+        })
+        .catch(error => alert(error.message));
+    });
 
-    // Create Staff Account
-    window.createStaff = async function () {
-      const designation = document.querySelector('input[name="designation"]:checked').value;
-      const name = document.getElementById('staff-name').value.trim();
-      const code = document.getElementById('staff-code').value.trim();
-
-      if (!name || !code) {
-        alert("Please enter both name and code.");
+    const form = document.getElementById("entryForm");
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const data = {
+        date: new Date().toLocaleDateString(),
+        staffName: staffNameField.value,
+        designation: staffDesigField.value,
+        patientName: form.patientName.value,
+        pcName: form.pcName.value,
+        pcCode: form.pcCode.value,
+        doctorName: form.doctorName.value,
+        newPatient: form.newPatient.value,
+        oldPatient: form.oldPatient.value,
+        testAmount: form.testAmount.value,
+        ot: form.ot.value,
+        otAmount: form.otAmount.value,
+        createdAt: serverTimestamp(),
+      };
+      if (!data.patientName || (!data.newPatient && !data.oldPatient)) {
+        alert("Please fill required fields.");
         return;
       }
+      await addDoc(collection(db, "patientEntries"), data);
+      form.reset();
+    });
 
-      try {
-        await addDoc(collection(db, "staffAccounts"), {
-          designation,
-          name,
-          code,
-          timestamp: new Date()
-        });
-        alert("Staff account created successfully!");
-        document.getElementById('staff-form').reset();
-      } catch (error) {
-        console.error("Error adding document: ", error);
-        alert("Failed to create account.");
-      }
-    }
-
-    // Auth state check
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        document.getElementById('login-section').style.display = 'none';
-        document.getElementById('panel-selection').style.display = 'block';
-      }
+    const tableBody = document.getElementById("dataBody");
+    onSnapshot(query(collection(db, "patientEntries"), orderBy("createdAt", "desc")), (snapshot) => {
+      tableBody.innerHTML = "";
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        const row = `<tr>
+          <td>${d.newPatient || ""}</td>
+          <td>${d.oldPatient || ""}</td>
+          <td>${d.testAmount || ""}</td>
+          <td>${d.ot || ""}</td>
+          <td>${d.otAmount || ""}</td>
+        </tr>`;
+        tableBody.innerHTML += row;
+      });
     });
   </script>
+  <style>
+    body { font-family: Arial; background: #001f8d; color: white; margin: 0; padding: 20px; }
+    .box { background: #0033cc; padding: 20px; border-radius: 10px; }
+    input, select, button { padding: 8px; margin: 5px; width: 90%; max-width: 300px; border-radius: 5px; }
+    table { width: 100%; margin-top: 20px; background: white; color: black; border-collapse: collapse; }
+    th, td { border: 1px solid #ccc; padding: 10px; text-align: center; }
+    #entrySection { display: none; }
+  </style>
+</head>
+<body>
+  <h1>Clinic Patient Entry</h1>
+  <button id="loginBtn">Login with Google</button>
+  <div id="userInfo"></div>
+
+  <div id="entrySection">
+    <div class="box">
+      <form id="entryForm">
+        <input id="staffName" name="staffName" placeholder="Staff Name" readonly><br>
+        <select id="staffDesig" name="staffDesig" required>
+          <option value="">Select Designation</option>
+          <option value="Marketing">Marketing</option>
+          <option value="Reception">Reception</option>
+          <option value="Attendance">Attendance</option>
+          <option value="Collection and Lab">Collection and Lab</option>
+          <option value="Others">Others</option>
+        </select><br>
+        <input name="patientName" placeholder="Patient Name" required><br>
+        <input name="pcName" placeholder="PC Name"><br>
+        <input name="pcCode" placeholder="PC Code"><br>
+        <input name="doctorName" placeholder="Doctor Name"><br>
+        <input name="newPatient" placeholder="New"><br>
+        <input name="oldPatient" placeholder="Old"><br>
+        <input name="testAmount" placeholder="Amount of Test"><br>
+        <input name="ot" placeholder="OT"><br>
+        <input name="otAmount" placeholder="OT Amount"><br>
+        <button type="submit">Submit</button>
+        <button type="reset">Clear</button>
+      </form>
+    </div>
+
+    <table>
+      <thead>
+        <tr><th>New</th><th>Old</th><th>Amount of Test</th><th>OT</th><th>OT Amount</th></tr>
+      </thead>
+      <tbody id="dataBody"></tbody>
+    </table>
+  </div>
 </body>
 </html>
