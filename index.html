@@ -4,132 +4,179 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Clinic Patient Entry</title>
-  <script type="module">
-    // Firebase Config
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyBqjaLgabOuFb6k8LIJXovKOZMjtxc3CjU",
-      authDomain: "clinicapp-a2f2a.firebaseapp.com",
-      projectId: "clinicapp-a2f2a",
-      storageBucket: "clinicapp-a2f2a.appspot.com",
-      messagingSenderId: "313561643437",
-      appId: "1:313561643437:web:194a95f5667928cfe78924",
-      measurementId: "G-YB9QF191NY"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth();
-    const provider = new GoogleAuthProvider();
-
-    const loginBtn = document.getElementById("loginBtn");
-    const userInfo = document.getElementById("userInfo");
-    const entrySection = document.getElementById("entrySection");
-    const staffNameField = document.getElementById("staffName");
-    const staffDesigField = document.getElementById("staffDesig");
-
-    loginBtn.addEventListener("click", () => {
-      signInWithPopup(auth, provider)
-        .then(result => {
-          const user = result.user;
-          userInfo.textContent = `Logged in as: ${user.displayName}`;
-          staffNameField.value = user.displayName;
-          entrySection.style.display = "block";
-        })
-        .catch(error => alert(error.message));
-    });
-
-    const form = document.getElementById("entryForm");
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const data = {
-        date: new Date().toLocaleDateString(),
-        staffName: staffNameField.value,
-        designation: staffDesigField.value,
-        patientName: form.patientName.value,
-        pcName: form.pcName.value,
-        pcCode: form.pcCode.value,
-        doctorName: form.doctorName.value,
-        newPatient: form.newPatient.value,
-        oldPatient: form.oldPatient.value,
-        testAmount: form.testAmount.value,
-        ot: form.ot.value,
-        otAmount: form.otAmount.value,
-        createdAt: serverTimestamp(),
-      };
-      if (!data.patientName || (!data.newPatient && !data.oldPatient)) {
-        alert("Please fill required fields.");
-        return;
-      }
-      await addDoc(collection(db, "patientEntries"), data);
-      form.reset();
-    });
-
-    const tableBody = document.getElementById("dataBody");
-    onSnapshot(query(collection(db, "patientEntries"), orderBy("createdAt", "desc")), (snapshot) => {
-      tableBody.innerHTML = "";
-      snapshot.forEach(doc => {
-        const d = doc.data();
-        const row = `<tr>
-          <td>${d.newPatient || ""}</td>
-          <td>${d.oldPatient || ""}</td>
-          <td>${d.testAmount || ""}</td>
-          <td>${d.ot || ""}</td>
-          <td>${d.otAmount || ""}</td>
-        </tr>`;
-        tableBody.innerHTML += row;
-      });
-    });
-  </script>
   <style>
-    body { font-family: Arial; background: #001f8d; color: white; margin: 0; padding: 20px; }
-    .box { background: #0033cc; padding: 20px; border-radius: 10px; }
-    input, select, button { padding: 8px; margin: 5px; width: 90%; max-width: 300px; border-radius: 5px; }
-    table { width: 100%; margin-top: 20px; background: white; color: black; border-collapse: collapse; }
-    th, td { border: 1px solid #ccc; padding: 10px; text-align: center; }
-    #entrySection { display: none; }
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      background-color: #001f8f;
+      color: white;
+    }
+    h2 {
+      text-align: center;
+      background: #002fbb;
+      padding: 15px;
+      font-size: 24px;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      background: #3366ff;
+      padding: 10px;
+      font-weight: bold;
+    }
+    .container {
+      display: flex;
+      padding: 20px;
+    }
+    .form-container, .summary-container {
+      flex: 1;
+      margin: 10px;
+      background: #0033cc;
+      padding: 20px;
+      border-radius: 10px;
+    }
+    input[type="text"], input[type="number"], input[type="date"] {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0 15px 0;
+      border: none;
+      border-radius: 5px;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 10px 5px 0 0;
+      background-color: white;
+      color: #0033cc;
+      font-weight: bold;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    table {
+      width: 100%;
+      background-color: white;
+      color: #0033cc;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #0033cc;
+      text-align: center;
+    }
+    .note {
+      background: white;
+      color: black;
+      padding: 10px;
+      margin: 20px;
+      border-radius: 5px;
+    }
   </style>
 </head>
 <body>
-  <h1>Clinic Patient Entry</h1>
-  <button id="loginBtn">Login with Google</button>
-  <div id="userInfo"></div>
-
-  <div id="entrySection">
-    <div class="box">
+  <h2>Welcome Clinic Patient Entry Form</h2>
+  <div class="header">
+    <div>Staff Name: <span id="staffName">John Doe</span></div>
+    <div>Designation: <span id="staffRole">Reception</span></div>
+  </div>
+  <div class="container">
+    <div class="form-container">
       <form id="entryForm">
-        <input id="staffName" name="staffName" placeholder="Staff Name" readonly><br>
-        <select id="staffDesig" name="staffDesig" required>
-          <option value="">Select Designation</option>
-          <option value="Marketing">Marketing</option>
-          <option value="Reception">Reception</option>
-          <option value="Attendance">Attendance</option>
-          <option value="Collection and Lab">Collection and Lab</option>
-          <option value="Others">Others</option>
-        </select><br>
-        <input name="patientName" placeholder="Patient Name" required><br>
-        <input name="pcName" placeholder="PC Name"><br>
-        <input name="pcCode" placeholder="PC Code"><br>
-        <input name="doctorName" placeholder="Doctor Name"><br>
-        <input name="newPatient" placeholder="New"><br>
-        <input name="oldPatient" placeholder="Old"><br>
-        <input name="testAmount" placeholder="Amount of Test"><br>
-        <input name="ot" placeholder="OT"><br>
-        <input name="otAmount" placeholder="OT Amount"><br>
+        <label>Date:</label>
+        <input type="date" id="entryDate" required readonly>
+
+        <label>Patient Name:</label>
+        <input type="text" id="patientName" required>
+
+        <label>PC Name:</label>
+        <input type="text" id="pcName" required>
+
+        <label>PC Code:</label>
+        <input type="text" id="pcCode" required>
+
+        <label>Doctor Name:</label>
+        <input type="text" id="doctorName" required>
+
+        <label>New:</label>
+        <input type="number" id="newCount" min="0">
+
+        <label>Old:</label>
+        <input type="number" id="oldCount" min="0">
+
+        <label>Amount of Test:</label>
+        <input type="number" id="testAmount" min="0">
+
+        <label>OT:</label>
+        <input type="number" id="otCount" min="0">
+
+        <label>OT Amount:</label>
+        <input type="number" id="otAmount" min="0">
+
         <button type="submit">Submit</button>
-        <button type="reset">Clear</button>
+        <button type="button" onclick="document.getElementById('entryForm').reset(); setToday();">Clear</button>
       </form>
     </div>
 
-    <table>
-      <thead>
+    <div class="summary-container">
+      <h3>Summary</h3>
+      <table>
         <tr><th>New</th><th>Old</th><th>Amount of Test</th><th>OT</th><th>OT Amount</th></tr>
-      </thead>
-      <tbody id="dataBody"></tbody>
-    </table>
+        <tr>
+          <td id="sumNew">0</td>
+          <td id="sumOld">0</td>
+          <td id="sumTest">0</td>
+          <td id="sumOT">0</td>
+          <td id="sumOTAmt">0</td>
+        </tr>
+      </table>
+      <p>এখানে সাবমিট করা ডাটা গুলো অটোমেটিক দেখাবে</p>
+    </div>
   </div>
+
+  <div class="note">
+    <h4>শর্তসমূহ:</h4>
+    <ol>
+      <li>Staff Name এবং Designation আগে Create করা থাকলে এই ফর্ম অটোফিল হবে।</li>
+      <li>নিচের টেবিলটি New, Old, Test, OT, OT Amount এর Total দেখাবে।</li>
+      <li>Submit করার জন্য অবশ্যই Patient Name, PC Name, PC Code, Doctor Name এবং New/Old এর যেকোনো একটি পূরণ করতে হবে।</li>
+    </ol>
+  </div>
+
+  <script>
+    function setToday() {
+      document.getElementById("entryDate").value = new Date().toISOString().split('T')[0];
+    }
+    setToday();
+
+    document.getElementById("entryForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const patient = document.getElementById("patientName").value.trim();
+      const pcName = document.getElementById("pcName").value.trim();
+      const pcCode = document.getElementById("pcCode").value.trim();
+      const doctor = document.getElementById("doctorName").value.trim();
+      const newC = parseInt(document.getElementById("newCount").value || "0");
+      const oldC = parseInt(document.getElementById("oldCount").value || "0");
+
+      if (!patient || !pcName || !pcCode || !doctor || (newC === 0 && oldC === 0)) {
+        alert("⚠️ সব ইনপুট পূরণ করুন, New অথবা Old যেকোনো একটিতে ভ্যালু দিতে হবে।");
+        return;
+      }
+
+      document.getElementById("sumNew").innerText = newC + parseInt(document.getElementById("sumNew").innerText);
+      document.getElementById("sumOld").innerText = oldC + parseInt(document.getElementById("sumOld").innerText);
+      document.getElementById("sumTest").innerText = parseInt(document.getElementById("testAmount").value || "0") + parseInt(document.getElementById("sumTest").innerText);
+      document.getElementById("sumOT").innerText = parseInt(document.getElementById("otCount").value || "0") + parseInt(document.getElementById("sumOT").innerText);
+      document.getElementById("sumOTAmt").innerText = parseInt(document.getElementById("otAmount").value || "0") + parseInt(document.getElementById("sumOTAmt").innerText);
+
+      alert("✅ সাবমিট সফল হয়েছে");
+      document.getElementById("entryForm").reset();
+      setToday();
+    });
+  </script>
 </body>
 </html>
