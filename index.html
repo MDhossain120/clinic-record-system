@@ -8,168 +8,185 @@
     body {
       margin: 0;
       font-family: 'Arial', sans-serif;
-      background-color: #001a66;
+      background-color: #000066;
       color: white;
     }
-    .center {
+    .header {
+      text-align: center;
+      padding: 20px;
+      font-size: 28px;
+      font-weight: bold;
+    }
+    .user-info {
+      display: flex;
+      justify-content: space-between;
+      background: linear-gradient(to right, #3366ff, #0000cc);
+      padding: 10px 30px;
+      font-weight: bold;
+      font-size: 18px;
+    }
+    .form-section {
       display: flex;
       justify-content: center;
-      align-items: center;
-      flex-direction: column;
+      align-items: start;
       padding: 20px;
     }
     .form-box {
-      background-color: #0033cc;
+      background-color: #0000cc;
       padding: 20px;
       border-radius: 10px;
-      width: 90%;
-      max-width: 700px;
-    }
-    .form-box input {
-      width: 100%;
-      padding: 8px;
-      margin: 5px 0 15px 0;
-      border: none;
-      border-radius: 5px;
+      width: 420px;
     }
     .form-box label {
       display: block;
-      margin-bottom: 5px;
+      margin-top: 10px;
     }
-    .button-row {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-    }
-    .button-row button {
-      flex: 1;
-      padding: 10px;
-      background-color: white;
-      color: #0033cc;
+    .form-box input {
+      width: 100%;
+      padding: 6px;
+      margin-top: 4px;
       border: none;
       border-radius: 5px;
-      font-weight: bold;
-      cursor: pointer;
     }
-    table {
-      width: 100%;
-      margin-bottom: 20px;
-      background-color: white;
-      color: black;
-      border-collapse: collapse;
-      text-align: center;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 5px;
-    }
-    .header-row {
-      background: linear-gradient(to right, #3366ff, #99ccff);
-      padding: 10px;
+    .form-buttons {
       display: flex;
       justify-content: space-between;
-      font-weight: bold;
+      margin-top: 15px;
     }
-    h2 {
+    .form-buttons button {
+      padding: 8px 16px;
+      border: none;
+      background-color: white;
+      color: #0000cc;
+      font-weight: bold;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .summary-table {
+      width: 90%;
+      margin: 0 auto 30px;
       text-align: center;
-      margin-top: 10px;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    .summary-table th, .summary-table td {
+      border: 1px solid white;
+      padding: 10px;
+    }
+    .summary-table th {
+      background-color: #000099;
+    }
+    .note {
+      text-align: center;
+      font-size: 18px;
+      margin: 20px;
+      color: yellow;
     }
   </style>
 </head>
 <body>
-  <h2>Welcome Clinic Patient Entry Form</h2>
-
-  <div class="header-row">
-    <div>Staff Name: <span id="staffName">---</span></div>
-    <div>Designation: <span id="staffDesignation">---</span></div>
+  <div class="header">Welcome Clinic Patient Entry From</div>
+  <div class="user-info">
+    <div>Staff Name: <span id="staffName"></span></div>
+    <div>Designation: <span id="staffDesignation"></span></div>
   </div>
 
-  <div class="center">
-    <table>
-      <thead>
-        <tr>
-          <th>New</th>
-          <th>Old</th>
-          <th>Amount of Test</th>
-          <th>OT</th>
-          <th>OT Amount</th>
-        </tr>
-      </thead>
-      <tbody id="summaryBody">
-        <!-- Data rows will be inserted here -->
-      </tbody>
-    </table>
+  <table class="summary-table">
+    <thead>
+      <tr>
+        <th>New</th>
+        <th>Old</th>
+        <th>Amount of Test</th>
+        <th>OT</th>
+        <th>OT Amount</th>
+      </tr>
+    </thead>
+    <tbody id="summaryBody">
+      <tr>
+        <td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
+      </tr>
+    </tbody>
+  </table>
 
+  <div class="form-section">
     <div class="form-box">
       <label>Date:</label>
-      <input type="date" id="date" readonly>
+      <input type="text" id="date" disabled />
+
       <label>Patient Name:</label>
-      <input type="text" id="patientName">
+      <input type="text" id="patientName" />
+
       <label>PC Name:</label>
-      <input type="text" id="pcName">
+      <input type="text" id="pcName" />
+
       <label>PC Code:</label>
-      <input type="text" id="pcCode">
+      <input type="text" id="pcCode" />
+
       <label>Doctor Name:</label>
-      <input type="text" id="doctorName">
+      <input type="text" id="doctorName" />
+
       <label>New:</label>
-      <input type="number" id="newPatient">
+      <input type="number" id="newPatient" />
+
       <label>Old:</label>
-      <input type="number" id="oldPatient">
+      <input type="number" id="oldPatient" />
+
       <label>Amount of Test:</label>
-      <input type="number" id="testCount">
+      <input type="number" id="amountTest" />
+
       <label>OT:</label>
-      <input type="number" id="otCount">
+      <input type="number" id="otCount" />
+
       <label>OT Amount:</label>
-      <input type="number" id="otAmount">
-      <div class="button-row">
-        <button onclick="submitData()">Submit</button>
-        <button onclick="clearForm()">Clear</button>
+      <input type="number" id="otAmount" />
+
+      <div class="form-buttons">
+        <button onclick="handleSubmit()">Submit</button>
+        <button onclick="handleClear()">Clear</button>
       </div>
     </div>
   </div>
 
+  <div class="note">
+    এখানে তাদের সাবমিটকৃত ডাটা গুলো গ্রাফিক আকারে দেখাবে
+  </div>
+
   <script>
-    // Show today's date
-    document.getElementById("date").value = new Date().toISOString().split("T")[0];
+    // Load Staff Info
+    const name = localStorage.getItem("staffName") || "";
+    const designation = localStorage.getItem("staffDesignation") || "";
+    document.getElementById("staffName").innerText = name;
+    document.getElementById("staffDesignation").innerText = designation;
 
-    // Dummy user data
-    const staffInfo = JSON.parse(localStorage.getItem("staffInfo"));
-    if (!staffInfo) window.location.href = "index.html"; // fallback
-    document.getElementById("staffName").innerText = staffInfo.name;
-    document.getElementById("staffDesignation").innerText = staffInfo.designation;
+    // Set today's date
+    document.getElementById("date").value = new Date().toLocaleDateString();
 
-    function submitData() {
-      const patientName = document.getElementById("patientName").value;
-      const pcName = document.getElementById("pcName").value;
-      const pcCode = document.getElementById("pcCode").value;
-      const doctorName = document.getElementById("doctorName").value;
-      const newP = document.getElementById("newPatient").value;
-      const oldP = document.getElementById("oldPatient").value;
-      const test = document.getElementById("testCount").value;
-      const ot = document.getElementById("otCount").value;
-      const otAmount = document.getElementById("otAmount").value;
+    function handleClear() {
+      document.querySelectorAll(".form-box input:not([disabled])").forEach(i => i.value = "");
+    }
 
-      // Validation
-      if (!patientName || !pcName || !pcCode || !doctorName || (!newP && !oldP)) {
-        alert("সব ঘর পূরণ করুন অথবা New/Old অন্তত একটি দিন");
+    function handleSubmit() {
+      const patientName = document.getElementById("patientName").value.trim();
+      const pcName = document.getElementById("pcName").value.trim();
+      const pcCode = document.getElementById("pcCode").value.trim();
+      const doctorName = document.getElementById("doctorName").value.trim();
+      const newPatient = document.getElementById("newPatient").value;
+      const oldPatient = document.getElementById("oldPatient").value;
+
+      if (!patientName || !pcName || !pcCode || !doctorName || (!newPatient && !oldPatient)) {
+        alert("দয়া করে প্রয়োজনীয় ঘর পূরণ করুন।");
         return;
       }
 
-      const row = `<tr><td>${newP}</td><td>${oldP}</td><td>${test}</td><td>${ot}</td><td>${otAmount}</td></tr>`;
-      document.getElementById("summaryBody").innerHTML += row;
-      clearForm();
-    }
+      const summaryRow = document.getElementById("summaryBody").rows[0];
+      summaryRow.cells[0].innerText = parseInt(newPatient || 0);
+      summaryRow.cells[1].innerText = parseInt(oldPatient || 0);
+      summaryRow.cells[2].innerText = parseInt(document.getElementById("amountTest").value || 0);
+      summaryRow.cells[3].innerText = parseInt(document.getElementById("otCount").value || 0);
+      summaryRow.cells[4].innerText = parseInt(document.getElementById("otAmount").value || 0);
 
-    function clearForm() {
-      document.getElementById("patientName").value = "";
-      document.getElementById("pcName").value = "";
-      document.getElementById("pcCode").value = "";
-      document.getElementById("doctorName").value = "";
-      document.getElementById("newPatient").value = "";
-      document.getElementById("oldPatient").value = "";
-      document.getElementById("testCount").value = "";
-      document.getElementById("otCount").value = "";
-      document.getElementById("otAmount").value = "";
+      alert("✅ ডাটা সফলভাবে সাবমিট হয়েছে!");
+      handleClear();
     }
   </script>
 </body>
