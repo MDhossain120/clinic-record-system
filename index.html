@@ -4,189 +4,146 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Clinic Patient Entry</title>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <style>
-    body {
-      margin: 0;
-      font-family: 'Arial', sans-serif;
-      background-color: #000066;
-      color: white;
-    }
-    .header {
-      text-align: center;
-      padding: 20px;
-      font-size: 28px;
-      font-weight: bold;
-    }
-    .user-info {
-      display: flex;
-      justify-content: space-between;
-      background: linear-gradient(to right, #3366ff, #0000cc);
-      padding: 10px 30px;
-      font-weight: bold;
-      font-size: 18px;
-    }
-    .form-section {
-      display: flex;
-      justify-content: center;
-      align-items: start;
-      padding: 20px;
-    }
-    .form-box {
-      background-color: #0000cc;
-      padding: 20px;
-      border-radius: 10px;
-      width: 420px;
-    }
-    .form-box label {
-      display: block;
-      margin-top: 10px;
-    }
-    .form-box input {
-      width: 100%;
-      padding: 6px;
-      margin-top: 4px;
-      border: none;
-      border-radius: 5px;
-    }
-    .form-buttons {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 15px;
-    }
-    .form-buttons button {
-      padding: 8px 16px;
-      border: none;
-      background-color: white;
-      color: #0000cc;
-      font-weight: bold;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .summary-table {
-      width: 90%;
-      margin: 0 auto 30px;
-      text-align: center;
-      border-collapse: collapse;
-      margin-top: 20px;
-    }
-    .summary-table th, .summary-table td {
-      border: 1px solid white;
-      padding: 10px;
-    }
-    .summary-table th {
-      background-color: #000099;
-    }
-    .note {
-      text-align: center;
-      font-size: 18px;
-      margin: 20px;
-      color: yellow;
-    }
+    body { font-family: Arial; background: #001f99; color: white; text-align: center; }
+    .panel, .form-section { display: none; margin: 20px auto; padding: 20px; background: #0033cc; border-radius: 10px; width: 90%; max-width: 600px; }
+    button, input, select { margin: 5px; padding: 10px; font-size: 16px; }
+    .radio-group { text-align: left; padding-left: 30px; }
+    table { width: 100%; margin-top: 10px; border-collapse: collapse; background: white; color: black; }
+    table th, table td { border: 1px solid #000; padding: 8px; }
+    .summary-box { background: #002080; padding: 20px; margin-top: 10px; }
   </style>
 </head>
 <body>
-  <div class="header">Welcome Clinic Patient Entry From</div>
-  <div class="user-info">
-    <div>Staff Name: <span id="staffName"></span></div>
-    <div>Designation: <span id="staffDesignation"></span></div>
+  <h1>Clinic Patient Entry</h1>
+  <div id="login-section">
+    <button onclick="loginWithGoogle()">🔒 Login with Google</button>
   </div>
 
-  <table class="summary-table">
-    <thead>
-      <tr>
-        <th>New</th>
-        <th>Old</th>
-        <th>Amount of Test</th>
-        <th>OT</th>
-        <th>OT Amount</th>
-      </tr>
-    </thead>
-    <tbody id="summaryBody">
-      <tr>
-        <td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
-      </tr>
-    </tbody>
-  </table>
+  <div id="panel-select" class="panel">
+    <h2>Please select your panel</h2>
+    <button onclick="showStaffAccountForm()">Staff Panel</button>
+    <button onclick="showManagerAccountForm()">Manager Panel</button>
+  </div>
 
-  <div class="form-section">
-    <div class="form-box">
-      <label>Date:</label>
-      <input type="text" id="date" disabled />
+  <div id="staff-account-form" class="form-section">
+    <h2>Create your account</h2>
+    <div class="radio-group">
+      <label><input type="radio" name="designation" value="Marketing"> Marketing</label><br>
+      <label><input type="radio" name="designation" value="Reception"> Reception</label><br>
+      <label><input type="radio" name="designation" value="Attendance"> Attendance</label><br>
+      <label><input type="radio" name="designation" value="Collection And Lab"> Collection And Lab</label><br>
+      <label><input type="radio" name="designation" value="Others"> Others</label>
+    </div>
+    <input type="text" id="staffName" placeholder="Enter Your Name">
+    <input type="text" id="staffCode" placeholder="Enter Code">
+    <button onclick="createStaffAccount()">Create</button>
+  </div>
 
-      <label>Patient Name:</label>
-      <input type="text" id="patientName" />
+  <div id="staff-data-form" class="form-section">
+    <h2>Welcome Clinic Patient Entry From</h2>
+    <div>
+      <strong>Staff Name:</strong> <span id="showStaffName"></span><br>
+      <strong>Designation:</strong> <span id="showDesignation"></span>
+    </div>
 
-      <label>PC Name:</label>
-      <input type="text" id="pcName" />
+    <form id="entryForm">
+      <input type="date" id="date"><br>
+      <input type="text" id="patientName" placeholder="Patient Name"><br>
+      <input type="text" id="pcName" placeholder="PC Name"><br>
+      <input type="text" id="pcCode" placeholder="PC Code"><br>
+      <input type="text" id="doctorName" placeholder="Doctor Name"><br>
+      <input type="number" id="newPatient" placeholder="New"><br>
+      <input type="number" id="oldPatient" placeholder="Old"><br>
+      <input type="number" id="testCount" placeholder="Amount of Test"><br>
+      <input type="number" id="otCount" placeholder="OT"><br>
+      <input type="number" id="otAmount" placeholder="OT Amount"><br>
+      <button type="button" onclick="submitData()">Submit</button>
+      <button type="reset">Clear</button>
+    </form>
 
-      <label>PC Code:</label>
-      <input type="text" id="pcCode" />
-
-      <label>Doctor Name:</label>
-      <input type="text" id="doctorName" />
-
-      <label>New:</label>
-      <input type="number" id="newPatient" />
-
-      <label>Old:</label>
-      <input type="number" id="oldPatient" />
-
-      <label>Amount of Test:</label>
-      <input type="number" id="amountTest" />
-
-      <label>OT:</label>
-      <input type="number" id="otCount" />
-
-      <label>OT Amount:</label>
-      <input type="number" id="otAmount" />
-
-      <div class="form-buttons">
-        <button onclick="handleSubmit()">Submit</button>
-        <button onclick="handleClear()">Clear</button>
-      </div>
+    <div class="summary-box">
+      <p>এখানে তাদের সাবমিটকৃত ডাটা গুলো গ্রাফিক আকারে দেখাবে</p>
     </div>
   </div>
 
-  <div class="note">
-    এখানে তাদের সাবমিটকৃত ডাটা গুলো গ্রাফিক আকারে দেখাবে
-  </div>
-
   <script>
-    // Load Staff Info
-    const name = localStorage.getItem("staffName") || "";
-    const designation = localStorage.getItem("staffDesignation") || "";
-    document.getElementById("staffName").innerText = name;
-    document.getElementById("staffDesignation").innerText = designation;
+    const firebaseConfig = {
+      apiKey: "AIzaSyBqjaLgabOuFb6k8LIJXovKOZMjtxc3CjU",
+      authDomain: "clinicapp-a2f2a.firebaseapp.com",
+      projectId: "clinicapp-a2f2a",
+      storageBucket: "clinicapp-a2f2a.appspot.com",
+      messagingSenderId: "313561643437",
+      appId: "1:313561643437:web:194a95f5667928cfe78924",
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
 
-    // Set today's date
-    document.getElementById("date").value = new Date().toLocaleDateString();
-
-    function handleClear() {
-      document.querySelectorAll(".form-box input:not([disabled])").forEach(i => i.value = "");
+    function loginWithGoogle() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider).then(() => {
+        document.getElementById("login-section").style.display = "none";
+        document.getElementById("panel-select").style.display = "block";
+      });
     }
 
-    function handleSubmit() {
-      const patientName = document.getElementById("patientName").value.trim();
-      const pcName = document.getElementById("pcName").value.trim();
-      const pcCode = document.getElementById("pcCode").value.trim();
-      const doctorName = document.getElementById("doctorName").value.trim();
-      const newPatient = document.getElementById("newPatient").value;
-      const oldPatient = document.getElementById("oldPatient").value;
+    function showStaffAccountForm() {
+      document.getElementById("panel-select").style.display = "none";
+      document.getElementById("staff-account-form").style.display = "block";
+    }
 
-      if (!patientName || !pcName || !pcCode || !doctorName || (!newPatient && !oldPatient)) {
-        alert("দয়া করে প্রয়োজনীয় ঘর পূরণ করুন।");
-        return;
+    function showManagerAccountForm() {
+      alert("Manager Panel উন্নয়নাধীন আছে। পরে যুক্ত হবে।");
+    }
+
+    function createStaffAccount() {
+      const name = document.getElementById("staffName").value;
+      const code = document.getElementById("staffCode").value;
+      const designation = document.querySelector('input[name="designation"]:checked')?.value;
+      if (!name || !code || !designation) return alert("সব ঘর পূরণ করুন");
+
+      localStorage.setItem("staffName", name);
+      localStorage.setItem("designation", designation);
+
+      document.getElementById("staff-account-form").style.display = "none";
+      document.getElementById("staff-data-form").style.display = "block";
+      document.getElementById("showStaffName").innerText = name;
+      document.getElementById("showDesignation").innerText = designation;
+    }
+
+    function submitData() {
+      const requiredFields = ["patientName", "pcName", "pcCode", "doctorName"];
+      const newCount = parseInt(document.getElementById("newPatient").value || 0);
+      const oldCount = parseInt(document.getElementById("oldPatient").value || 0);
+
+      if (!newCount && !oldCount) return alert("New অথবা Old এর যেকোনো একটি পূরণ করুন");
+      for (let id of requiredFields) {
+        if (!document.getElementById(id).value) return alert("সব ঘর পূরণ করুন");
       }
 
-      const summaryRow = document.getElementById("summaryBody").rows[0];
-      summaryRow.cells[0].innerText = parseInt(newPatient || 0);
-      summaryRow.cells[1].innerText = parseInt(oldPatient || 0);
-      summaryRow.cells[2].innerText = parseInt(document.getElementById("amountTest").value || 0);
-      summaryRow.cells[3].innerText = parseInt(document.getElementById("otCount").value || 0);
-      summaryRow.cells[4].innerText = parseInt(document.getElementById("otAmount").value || 0);
+      const data = {
+        date: new Date().toISOString().slice(0, 10),
+        staffName: localStorage.getItem("staffName"),
+        designation: localStorage.getItem("designation"),
+        patientName: document.getElementById("patientName").value,
+        pcName: document.getElementById("pcName").value,
+        pcCode: document.getElementById("pcCode").value,
+        doctorName: document.getElementById("doctorName").value,
+        new: newCount,
+        old: oldCount,
+        testCount: parseInt(document.getElementById("testCount").value || 0),
+        otCount: parseInt(document.getElementById("otCount").value || 0),
+        otAmount: parseInt(document.getElementById("otAmount").value || 0),
+      };
 
-      alert("✅ ডাটা সফলভাবে সাবমিট হয়েছে!");
-      handleClear();
+      db.collection("clinicRecords").add(data).then(() => {
+        alert("ডাটা সফলভাবে সংরক্ষিত হয়েছে");
+        document.getElementById("entryForm").reset();
+      });
     }
   </script>
 </body>
