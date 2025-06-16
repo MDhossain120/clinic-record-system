@@ -86,9 +86,25 @@
     function loginWithGoogle() {
       const provider = new firebase.auth.GoogleAuthProvider();
       auth.signInWithPopup(provider).then(() => {
-        document.getElementById("login-section").style.display = "none";
-        document.getElementById("panel-select").style.display = "block";
+        handlePostLogin();
       });
+    }
+
+    auth.onAuthStateChanged(user => {
+      if (user) handlePostLogin();
+    });
+
+    function handlePostLogin() {
+      document.getElementById("login-section").style.display = "none";
+      const name = localStorage.getItem("staffName");
+      const designation = localStorage.getItem("designation");
+      if (name && designation) {
+        document.getElementById("staff-data-form").style.display = "block";
+        document.getElementById("showStaffName").innerText = name;
+        document.getElementById("showDesignation").innerText = designation;
+      } else {
+        document.getElementById("panel-select").style.display = "block";
+      }
     }
 
     function showStaffAccountForm() {
