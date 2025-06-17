@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Manager Panel</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4; }
+    h2 { text-align: center; color: #333; }
+    .section { background: white; padding: 15px; margin: 20px auto; border-radius: 8px; max-width: 700px; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
+    input, button { padding: 10px; width: 100%; margin: 8px 0; }
+    table { width: 100%; margin-top: 10px; border-collapse: collapse; }
+    table, th, td { border: 1px solid #ccc; }
+    th, td { padding: 8px; text-align: left; }
+    button.delete { background: red; color: white; }
+  </style>
+</head>
+<body>
+
+  <h2>Manager Panel</h2>
+
+  <!-- Section 1: Create Staff Account -->
+  <div class="section">
+    <h3>Create Staff Account</h3>
+    <input type="email" id="staffEmail" placeholder="Staff Email" required>
+    <input type="text" id="staffName" placeholder="Staff Name" required>
+    <input type="text" id="staffDesig" placeholder="Designation" required>
+    <button onclick="createStaff()">Create Account</button>
+  </div>
+
+  <!-- Section 2: Staff Search -->
+  <div class="section">
+    <h3>Search Staff</h3>
+    <input type="text" id="searchBox" placeholder="Search by name..." oninput="filterStaff()">
+    <table id="staffTable">
+      <thead>
+        <tr><th>Name</th><th>Email</th><th>Designation</th></tr>
+      </thead>
+      <tbody id="staffList"></tbody>
+    </table>
+  </div>
+
+  <!-- Section 3: Clear Monthly Data -->
+  <div class="section">
+    <h3>Clear Monthly Patient Records</h3>
+    <button class="delete" onclick="clearMonthlyData()">Delete All Patient Records</button>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBqjaLgabOuFb6k8LIJXovKOZMjtxc3CjU",
+      authDomain: "clinicapp-a2f2a.firebaseapp.com",
+      projectId: "clinicapp-a2f2a",
+      storageBucket: "clinicapp-a2f2a.appspot.com",
+      messagingSenderId: "313561643437",
+      appId: "1:313561643437:web:194a95f5667928cfe78924"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Create Staff Account
+    async function createStaff() {
+      const email = document.getElementById("staffEmail").value;
+      const name = document.getElementById("staffName").value;
+      const designation = document.getElementById("staffDesig").value;
+
+      if (!email || !name || !designation) {
+        alert("Please fill all fields");
+        return;
+      }
+
+      try {
+        await addDoc(collection(db, "users"), {
+          email, name, designation, panel: "staff"
+        });
+        alert("Staff account created!");
+        loadStaff();
+      } catch (err) {
+        alert("Error: " + err.message);
+      }
+    }
+
+    // Load Staff List
+    async function loadStaff() {
+      const list = document.getElementById("staffList");
+      list.innerHTML = "";
+      const querySnapshot = await getDocs(collection(db, "users"));
+      querySnapshot.forEach((docSnap) => {
+        const data = docSnap.data();
+        if (data.panel === "staff") {
+          const row = document.createElement("tr");
+          row.innerHTML = `<td>${data.name}</td><td>${data.email}</td><td>${data.designation}</td>`;
+          list.appendChild(row);
+        }
+      });
+    }
+
+    function filterStaff() {
+      const filter = document.getElementById("searchBox").value.toLowerCase();
+      const rows = document.querySelectorAll("#staffList tr");
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(filter) ? "" : "none";
+      });
+    }
+
+    // Clear All Patient Records
+    async function clearMonthlyData() {
+      if (!confirm("Are you sure you want to delete ALL patient records?")) return;
+      const querySnapshot = await getDocs(collection(db, "patientRecords"));
+      for (const docSnap of querySnapshot.docs) {
+        await deleteDoc(doc(db, "patientRecords", docSnap.id));
+      }
+      alert("All patient records deleted.");
+    }
+
+    // Initial load
+    loadStaff();
+  </script>
+
+</body>
+</html>
