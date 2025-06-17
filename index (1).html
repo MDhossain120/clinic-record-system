@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Clinic Patient Entry</title>
+  <script type="module" src="app.js"></script>
+  <style>
+    body {
+      font-family: Arial;
+      background-color: #001f8c;
+      color: white;
+      text-align: center;
+    }
+    .panel, .account-section, .form-section {
+      display: none;
+      background-color: #0044cc;
+      margin: 20px auto;
+      padding: 20px;
+      width: 90%;
+      max-width: 500px;
+      border-radius: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 5px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    input[type="text"], input[type="number"] {
+      width: 90%;
+      padding: 8px;
+      margin: 5px 0;
+    }
+    .form-group {
+      margin-bottom: 10px;
+      text-align: left;
+    }
+    .radio-group label {
+      margin-right: 15px;
+    }
+    .form-table {
+      margin: 10px auto;
+      background-color: white;
+      color: black;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Clinic Patient Entry</h1>
+  <div id="login-section">
+    <button id="login-btn">Login with Google</button>
+  </div>
+
+  <div id="panel-selection" class="panel">
+    <h3>Please select your panel</h3>
+    <button onclick="selectPanel('staff')">Staff Panel</button>
+    <button onclick="selectPanel('manager')">Manager Panel</button>
+  </div>
+
+  <!-- Staff Panel - Create Account -->
+  <div id="staff-create" class="account-section">
+    <h3>Create your account</h3>
+    <div class="radio-group">
+      <strong>Select Your Designation</strong><br />
+      <label><input type="radio" name="designation" value="Marketing"> Marketing</label>
+      <label><input type="radio" name="designation" value="Reception"> Reception</label>
+      <label><input type="radio" name="designation" value="Attendance"> Attendance</label>
+      <label><input type="radio" name="designation" value="Collection and Lab"> Collection and Lab</label>
+      <label><input type="radio" name="designation" value="Others"> Others</label>
+    </div>
+    <div class="form-group">
+      <label>Enter Your Name:</label><br />
+      <input type="text" id="staff-name" />
+    </div>
+    <div class="form-group">
+      <label>Enter Code:</label><br />
+      <input type="text" id="staff-code" />
+    </div>
+    <button onclick="createStaffAccount()">Create</button>
+  </div>
+
+  <!-- Manager Panel - Create Account -->
+  <div id="manager-create" class="account-section">
+    <h3>Manager Panel</h3>
+    <div class="form-group">
+      <label>Enter Your Name:</label><br />
+      <input type="text" id="manager-name" />
+    </div>
+    <div class="form-group">
+      <label>Enter Code:</label><br />
+      <input type="text" id="manager-code" />
+    </div>
+    <button onclick="createManagerAccount()">Create</button>
+  </div>
+
+  <!-- Staff Daily Entry Form -->
+  <div id="staff-form" class="form-section">
+    <h3>Welcome Clinic Patient Entry Form</h3>
+    <div id="staff-header">
+      <strong>Staff Name:</strong> <span id="staffDisplayName"></span> |
+      <strong>Designation:</strong> <span id="staffDesignation"></span>
+    </div>
+
+    <div class="form-group">
+      <label>Date (Auto):</label>
+      <input type="text" id="date" readonly />
+    </div>
+    <div class="form-group">
+      <label>Patient Name:</label>
+      <input type="text" id="patientName" />
+    </div>
+    <div class="form-group">
+      <label>PC Name:</label>
+      <input type="text" id="pcName" />
+    </div>
+    <div class="form-group">
+      <label>PC Code:</label>
+      <input type="text" id="pcCode" />
+    </div>
+    <div class="form-group">
+      <label>Doctor Name:</label>
+      <input type="text" id="doctorName" />
+    </div>
+    <div class="form-group">
+      <label>New:</label>
+      <input type="number" id="newCount" />
+    </div>
+    <div class="form-group">
+      <label>Old:</label>
+      <input type="number" id="oldCount" />
+    </div>
+    <div class="form-group">
+      <label>Amount of Test:</label>
+      <input type="number" id="testAmount" />
+    </div>
+    <div class="form-group">
+      <label>OT:</label>
+      <input type="number" id="ot" />
+    </div>
+    <div class="form-group">
+      <label>OT Amount:</label>
+      <input type="number" id="otAmount" />
+    </div>
+    <button onclick="submitPatientData()">Submit</button>
+    <button onclick="clearForm()">Clear</button>
+  </div>
+
+  <!-- Firebase Config -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, addDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBqjaLgabOuFb6k8LIJXovKOZMjtxc3CjU",
+      authDomain: "clinicapp-a2f2a.firebaseapp.com",
+      projectId: "clinicapp-a2f2a",
+      storageBucket: "clinicapp-a2f2a.appspot.com",
+      messagingSenderId: "313561643437",
+      appId: "1:313561643437:web:194a95f5667928cfe78924",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth();
+    const db = getFirestore();
+    const provider = new GoogleAuthProvider();
+
+    let currentUser = null;
+
+    document.getElementById("login-btn").addEventListener("click", () => {
+      signInWithPopup(auth, provider).then((result) => {
+        currentUser = result.user;
+        checkPanelSelection();
+      });
+    });
+
+    function checkPanelSelection() {
+      const userDoc = doc(db, "users", currentUser.uid);
+      getDoc(userDoc).then((docSnap) => {
+        if (docSnap.exists()) {
+          const panel = docSnap.data().panel;
+          if (panel === "staff") {
+            showElement("staff-form");
+            fillDate();
+            document.getElementById("staffDisplayName").innerText = docSnap.data().name;
+            document.getElementById("staffDesignation").innerText = docSnap.data().designation;
+          } else if (panel === "manager") {
+            alert("Manager panel coming soon.");
+          }
+        } else {
+          showElement("panel-selection");
+        }
+      });
+    }
+
+    window.selectPanel = function(panel) {
+      if (panel === "staff") {
+        showElement("staff-create");
+      } else {
+        showElement("manager-create");
+      }
+    };
+
+    window.createStaffAccount = async function () {
+      const name = document.getElementById("staff-name").value;
+      const code = document.getElementById("staff-code").value;
+      const designation = document.querySelector('input[name="designation"]:checked')?.value;
+      if (!name || !code || !designation) return alert("All fields required!");
+      await setDoc(doc(db, "users", currentUser.uid), {
+        uid: currentUser.uid,
+        name, code, designation,
+        panel: "staff",
+      });
+      document.getElementById("staffDisplayName").innerText = name;
+      document.getElementById("staffDesignation").innerText = designation;
+      showElement("staff-form");
+      fillDate();
+    };
+
+    window.createManagerAccount = async function () {
+      const name = document.getElementById("manager-name").value;
+      const code = document.getElementById("manager-code").value;
+      if (!name || !code) return alert("All fields required!");
+      await setDoc(doc(db, "users", currentUser.uid), {
+        uid: currentUser.uid,
+        name, code,
+        panel: "manager",
+      });
+      alert("Manager panel setup complete (coming soon).");
+    };
+
+    window.submitPatientData = async function () {
+      const patientName = document.getElementById("patientName").value;
+      const pcName = document.getElementById("pcName").value;
+      const pcCode = document.getElementById("pcCode").value;
+      const doctorName = document.getElementById("doctorName").value;
+      const newCount = document.getElementById("newCount").value;
+      const oldCount = document.getElementById("oldCount").value;
+      const testAmount = document.getElementById("testAmount").value;
+      const ot = document.getElementById("ot").value;
+      const otAmount = document.getElementById("otAmount").value;
+
+      if (!patientName || !pcName || !pcCode || !doctorName || (!newCount && !oldCount)) {
+        return alert("Please fill all required fields!");
+      }
+
+      await addDoc(collection(db, "patientData"), {
+        uid: currentUser.uid,
+        date: new Date().toISOString().split('T')[0],
+        patientName, pcName, pcCode, doctorName,
+        newCount: Number(newCount),
+        oldCount: Number(oldCount),
+        testAmount: Number(testAmount),
+        ot: Number(ot),
+        otAmount: Number(otAmount),
+        timestamp: serverTimestamp()
+      });
+
+      alert("Data submitted successfully!");
+      clearForm();
+    };
+
+    window.clearForm = function () {
+      document.querySelectorAll('#staff-form input[type="text"], input[type="number"]').forEach(input => input.value = "");
+      fillDate();
+    };
+
+    function showElement(id) {
+      document.querySelectorAll(".panel, .account-section, .form-section").forEach(el => el.style.display = "none");
+      document.getElementById(id).style.display = "block";
+    }
+
+    function fillDate() {
+      document.getElementById("date").value = new Date().toISOString().split("T")[0];
+    }
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        currentUser = user;
+        checkPanelSelection();
+      }
+    });
+  </script>
+</body>
+</html>
