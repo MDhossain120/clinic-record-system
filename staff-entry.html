@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Staff Daily Entry</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f0f0f0; }
+    h2 { color: #333; }
+    form { background: white; padding: 20px; border-radius: 8px; max-width: 500px; margin: auto; }
+    input, select { width: 100%; padding: 8px; margin: 10px 0; }
+    button { padding: 10px 15px; background: green; color: white; border: none; border-radius: 4px; }
+    #user-info { margin-bottom: 20px; background: #e7f5ff; padding: 10px; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <h2>Staff Daily Entry Form</h2>
+
+  <div id="user-info">
+    <strong>Name:</strong> <span id="staffName">Loading...</span><br>
+    <strong>Designation:</strong> <span id="staffDesig">Loading...</span>
+  </div>
+
+  <form id="entryForm">
+    <input type="date" id="entryDate" required>
+    <input type="text" id="patientName" placeholder="Patient Name" required>
+    <input type="text" id="pcName" placeholder="PC Name" required>
+    <input type="text" id="pcCode" placeholder="PC Code" required>
+    <input type="text" id="doctorName" placeholder="Doctor Name" required>
+    <input type="number" id="newPatients" placeholder="New Patients" required>
+    <input type="number" id="oldPatients" placeholder="Old Patients" required>
+    <input type="number" id="testCount" placeholder="Test Count" required>
+    <input type="text" id="ot" placeholder="OT Cases">
+    <input type="number" id="otAmount" placeholder="OT Amount">
+
+    <button type="submit">Submit</button>
+  </form>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBqjaLgabOuFb6k8LIJXovKOZMjtxc3CjU",
+      authDomain: "clinicapp-a2f2a.firebaseapp.com",
+      projectId: "clinicapp-a2f2a",
+      storageBucket: "clinicapp-a2f2a.appspot.com",
+      messagingSenderId: "313561643437",
+      appId: "1:313561643437:web:194a95f5667928cfe78924"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let currentUserData = null;
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+          currentUserData = userSnap.data();
+          document.getElementById("staffName").textContent = currentUserData.name;
+          document.getElementById("staffDesig").textContent = currentUserData.designation;
+        } else {
+          alert("Account data not found!");
+        }
+      } else {
+        alert("You are not logged in");
+        window.location.href = "login.html";
+      }
+    });
+
+    document.getElementById("entryForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const data = {
+        uid: auth.currentUser.uid,
+        name: currentUserData.name,
+        designation: currentUserData.designation,
+        date: document.getElementById("entryDate").value,
+        patientName: document.getElementById("patientName").value,
+        pcName: document.getElementById("pcName").value,
+        pcCode: document.getElementById("pcCode").value,
+        doctorName: document.getElementById("doctorName").value,
+        newPatients: Number(document.getElementById("newPatients").value),
+        oldPatients: Number(document.getElementById("oldPatients").value),
+        testCount: Number(document.getElementById("testCount").value),
+        ot: document.getElementById("ot").value,
+        otAmount: Number(document.getElementById("otAmount").value || 0),
+        timestamp: serverTimestamp()
+      };
+
+      try {
+        await addDoc(collection(db, "patientRecords"), data);
+        alert("Data submitted successfully!");
+        document.getElementById("entryForm").reset();
+      } catch (error) {
+        alert("Error submitting data: " + error.message);
+      }
+    });
+  </script>
+</body>
+</html>
