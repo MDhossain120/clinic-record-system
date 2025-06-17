@@ -1,125 +1,85 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Panel Selection - Clinic Entry</title>
-  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js"></script>
-  <style>
-    body { font-family: Arial, sans-serif; background-color: #003399; color: white; text-align: center; }
-    .container { margin-top: 50px; }
-    .panel-selection, .form-container { margin: 30px auto; width: 80%; max-width: 400px; }
-    button, select, input[type="text"] {
-      padding: 10px;
-      margin: 10px 0;
-      width: 100%;
-      border-radius: 5px;
-      border: none;
-      font-size: 16px;
-    }
-    button { background-color: #0044cc; color: white; cursor: pointer; }
-    label { display: block; margin: 10px 0 5px; text-align: left; }
-    .hidden { display: none; }
-  </style>
+  <title>Select Your Panel</title>
 </head>
 <body>
-  <div class="container">
-    <h1>Select Your Panel</h1>
-    <div class="panel-selection">
-      <button onclick="selectPanel('staff')">Staff Panel</button>
-      <button onclick="selectPanel('manager')">Manager Panel</button>
-    </div>
+  <h2>Please Select Your Panel</h2>
+  
+  <label>
+    <input type="radio" name="role" value="staff"> Staff Panel
+  </label>
+  <label>
+    <input type="radio" name="role" value="manager"> Manager Panel
+  </label>
 
-    <div id="staff-form" class="form-container hidden">
-      <h2>Create Staff Account</h2>
-      <label>Select Designation:</label>
-      <select id="staff-designation">
-        <option value="Marketing">Marketing</option>
-        <option value="Reception">Reception</option>
-        <option value="Attendance">Attendance</option>
-        <option value="Collection and Lab">Collection and Lab</option>
-        <option value="Others">Others</option>
-      </select>
-      <label>Enter Your Name:</label>
-      <input type="text" id="staff-name" placeholder="Your Name"/>
-      <label>Enter Code:</label>
-      <input type="text" id="staff-code" placeholder="Enter Code"/>
-      <button onclick="submitForm('staff')">Create</button>
-    </div>
-
-    <div id="manager-form" class="form-container hidden">
-      <h2>Manager Panel</h2>
-      <label>Enter Your Name:</label>
-      <input type="text" id="manager-name" placeholder="Manager Name"/>
-      <label>Enter Code:</label>
-      <input type="text" id="manager-code" placeholder="Enter Code"/>
-      <button onclick="submitForm('manager')">Create</button>
-    </div>
+  <div id="accountForm" style="display:none; margin-top: 20px;">
+    <h3>Create Your Account</h3>
+    <input type="text" id="name" placeholder="Your Name"><br><br>
+    <input type="text" id="designation" placeholder="Designation"><br><br>
+    <input type="text" id="code" placeholder="Your Code"><br><br>
+    <button id="createAccountBtn">Create Account</button>
   </div>
 
-  <script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+
     const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_AUTH_DOMAIN",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_STORAGE_BUCKET",
-      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-      appId: "YOUR_APP_ID"
+      apiKey: "AIzaSyBqjaLgabOuFb6k8LIJXovKOZMjtxc3CjU",
+      authDomain: "clinicapp-a2f2a.firebaseapp.com",
+      projectId: "clinicapp-a2f2a",
+      storageBucket: "clinicapp-a2f2a.appspot.com",
+      messagingSenderId: "313561643437",
+      appId: "1:313561643437:web:194a95f5667928cfe78924",
+      measurementId: "G-YB9QF191NY"
     };
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-    let currentUser = null;
+    let selectedRole = null;
 
-    auth.onAuthStateChanged(async (user) => {
-      if (!user) {
-        window.location.href = "login.html";
-      } else {
-        currentUser = user;
-        const doc = await db.collection("users").doc(user.uid).get();
-        if (doc.exists && doc.data().panel) {
-          window.location.href = "entry.html";
-        }
-      }
+    document.querySelectorAll('input[name="role"]').forEach((el) => {
+      el.addEventListener("change", () => {
+        selectedRole = el.value;
+        document.getElementById("accountForm").style.display = "block";
+      });
     });
 
-    function selectPanel(panelType) {
-      document.getElementById("staff-form").classList.add("hidden");
-      document.getElementById("manager-form").classList.add("hidden");
-      if (panelType === "staff") {
-        document.getElementById("staff-form").classList.remove("hidden");
-      } else {
-        document.getElementById("manager-form").classList.remove("hidden");
-      }
-    }
+    document.getElementById("createAccountBtn").addEventListener("click", async () => {
+      const name = document.getElementById("name").value;
+      const designation = document.getElementById("designation").value;
+      const code = document.getElementById("code").value;
 
-    async function submitForm(panelType) {
-      if (!currentUser) return;
-      let name = "", code = "", designation = "";
-      if (panelType === "staff") {
-        name = document.getElementById("staff-name").value;
-        code = document.getElementById("staff-code").value;
-        designation = document.getElementById("staff-designation").value;
-        if (!name || !code) return alert("Fill all staff fields");
-      } else {
-        name = document.getElementById("manager-name").value;
-        code = document.getElementById("manager-code").value;
-        if (!name || !code) return alert("Fill all manager fields");
+      if (!name || !designation || !code || !selectedRole) {
+        alert("Please fill in all fields and select a panel.");
+        return;
       }
-      await db.collection("users").doc(currentUser.uid).set({
-        name: name,
-        code: code,
-        panel: panelType,
-        designation: designation || null,
-        email: currentUser.email
+
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          const userRef = doc(db, "users", user.uid);
+          await setDoc(userRef, {
+            name: name,
+            designation: designation,
+            code: code,
+            email: user.email,
+            role: selectedRole
+          });
+
+          if (selectedRole === "staff") {
+            window.location.href = "staff-entry.html";
+          } else {
+            window.location.href = "manager-panel.html";
+          }
+        } else {
+          alert("User not logged in");
+        }
       });
-      window.location.href = "entry.html";
-    }
+    });
   </script>
 </body>
 </html>
