@@ -1,60 +1,64 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Clinic Patient Entry - Login</title>
-  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js"></script>
-  <style>
-    body { font-family: Arial, sans-serif; background-color: #003399; color: white; text-align: center; }
-    .container { margin-top: 100px; }
-    button {
-      padding: 15px 30px;
-      background-color: #ccc;
-      border: none;
-      border-radius: 10px;
-      font-size: 20px;
-      cursor: pointer;
-    }
-  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Clinic Patient Entry</h1>
-    <button onclick="login()">Login with Google</button>
-  </div>
+  <h2>Clinic Patient Entry</h2>
+  <button id="googleLoginBtn">Login with Google</button>
 
-  <script>
+  <script type="module">
+    // Firebase SDK import
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+
+    // Firebase config
     const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_AUTH_DOMAIN",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_STORAGE_BUCKET",
-      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-      appId: "YOUR_APP_ID"
+      apiKey: "AIzaSyBqjaLgabOuFb6k8LIJXovKOZMjtxc3CjU",
+      authDomain: "clinicapp-a2f2a.firebaseapp.com",
+      projectId: "clinicapp-a2f2a",
+      storageBucket: "clinicapp-a2f2a.appspot.com",
+      messagingSenderId: "313561643437",
+      appId: "1:313561643437:web:194a95f5667928cfe78924",
+      measurementId: "G-YB9QF191NY"
     };
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
 
-    function login() {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider).then(async (result) => {
+    // Login Button Action
+    document.getElementById("googleLoginBtn").addEventListener("click", async () => {
+      try {
+        const result = await signInWithPopup(auth, provider);
         const user = result.user;
-        const userDoc = await db.collection("users").doc(user.uid).get();
-        if (userDoc.exists && userDoc.data().panel) {
-          window.location.href = "entry.html";
+        const uid = user.uid;
+
+        // Check if user already created account
+        const docRef = doc(db, "users", uid);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (data.role === "staff") {
+            window.location.href = "staff-entry.html";
+          } else if (data.role === "manager") {
+            window.location.href = "manager-panel.html";
+          } else {
+            window.location.href = "panel.html";
+          }
         } else {
+          // New user, go to panel selection
           window.location.href = "panel.html";
         }
-      }).catch((error) => {
-        console.error("Login error:", error);
-      });
-    }
+      } catch (error) {
+        console.error("Login Error:", error.message);
+        alert("Login failed! Try again.");
+      }
+    });
   </script>
 </body>
 </html>
